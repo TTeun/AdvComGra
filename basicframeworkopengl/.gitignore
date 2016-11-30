@@ -1,0 +1,7 @@
+*.pro.user
+.qmake.stash
+Makefile
+ui_subphys.h
+*.o
+moc_subphys.cpp
+BasicOpenGL

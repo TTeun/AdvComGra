@@ -1,0 +1,9 @@
+*.pro.user
+*.o
+SubdivCurves
+ui_mainwindow.h
+moc_mainview.cpp
+moc_mainwindow.cpp
+qrc_resources.cpp
+Makefile
+.qmake.stash
