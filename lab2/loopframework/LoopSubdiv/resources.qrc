@@ -1,0 +1,8 @@
+<RCC>
+    <qresource prefix="/">
+        <file>shaders/fragshader.glsl</file>
+        <file>shaders/vertshader.glsl</file>
+        <file>shaders/reflshader.glsl</file>
+        <file>shaders/flatfragshader.glsl</file>
+    </qresource>
+</RCC>
