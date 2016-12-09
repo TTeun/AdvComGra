@@ -129,10 +129,17 @@ void MainView::updateMatrices() {
   modelViewMatrix.setToIdentity();
   modelViewMatrix.translate(QVector3D(0.0, 0.0, -3.0));
   modelViewMatrix.scale(QVector3D(1.0, 1.0, 1.0));
-  modelViewMatrix.rotate(rotAngle, QVector3D(0.0, 1.0, 0.0));
+
+  // Rotate around y-axis first
+  modelViewMatrix.rotate(rotX, 0.0, 1.0, 0.0);
+
+  // To now rotate about apparent x-axis, i.e., the axis from left to right on the screen, we must
+  // multiply (1.0, 0.0, 0.0) by the inverse modelview matrix. 4th coordinate is 0.0 -> no translation
+  QVector4D dir = modelViewMatrix.inverted() * QVector4D(1.0, 0.0, 0.0, 0.0);
+  modelViewMatrix.rotate(rotY, dir[0], dir[1], dir[2]);
 
   projectionMatrix.setToIdentity();
-  projectionMatrix.perspective(FoV, dispRatio, 0.2, 4.0);
+  projectionMatrix.perspective(FoV, dispRatio, 0.2, 8.0);
 
   normalMatrix = modelViewMatrix.normalMatrix();
 
@@ -235,15 +242,102 @@ void MainView::renderMesh() {
     glDrawElements(GL_TRIANGLE_FAN, meshIBOSize, GL_UNSIGNED_INT, 0);
   }
 
+  if (selected_index > -1){ // This is to show the point selected by the user
+      glPointSize(10.0);
+      glDrawArrays(GL_POINTS, selected_index, 1);
+  }
+
   glBindVertexArray(0);
 
 }
 
-// ---
-
 void MainView::mousePressEvent(QMouseEvent* event) {
   setFocus();
+  float xRatio, yRatio, xScene, yScene;
+  xRatio = (float)event->x() / width();
+  yRatio = (float)event->y() / height();
+
+  // Get the mouse position in NDS
+  xScene = 2 * xRatio - 1;
+  yScene = 1 - 2 * yRatio;
+
+  if (event->button() == Qt::RightButton){ // If Right button pressed
+      lastPos[0] = xScene; // Store the position of mouse
+      lastPos[1] = yScene;
+
+      rotating = true; // And start rotating
+  }
+  if (event->button() == Qt::LeftButton){ // If Left button pressed
+
+      // We send a ray out into the scene and find the closest vertex to it
+
+      // Unproject the ray from NDS
+      QVector4D ray_eye = (projectionMatrix.inverted()) * QVector4D(xScene, yScene, -1.0, 1.0);
+      ray_eye[2] = -1.0;
+      ray_eye[3] = 0.0; //  The ray is a direction, not a position
+
+      // Invert the modelview
+      QMatrix4x4 MV = modelViewMatrix.inverted();
+      QVector4D ray_f = MV * ray_eye;
+
+      // This is the direction the ray shoots in
+      QVector3D ray_final = (QVector3D(ray_f[0], ray_f[1], ray_f[2])).normalized();
+
+      // This is the origin of the ray in world coordinates
+      QVector4D lastCol = MV.column(3);
+      QVector3D origin = QVector3D(lastCol[0], lastCol[1], lastCol[2]);
+
+      // We now look for the vertex that minimizes the distance to this ray
+      float dist, minDist = 1000.0;
+      int minIndex = 0;
+      for (int i = 0; i < vertexCoords.size(); ++i){
+          dist = vertexCoords[i].distanceToLine(origin, ray_final); // Nice Qt helper function
+          if (dist < minDist){
+              minDist = dist;
+              minIndex = i;
+          }
+      }
+      selected_index = minDist < 0.03 ? minIndex : -1;
+      updateMatrices();
+  }
 }
+
+void MainView::mouseMoveEvent(QMouseEvent* event) {
+  setFocus();
+  if (rotating){    // If we are rotating currently
+      float xRatio, yRatio, xScene, yScene;
+
+      xRatio = (float)event->x() / width();
+      yRatio = (float)event->y() / height();
+
+      xScene = 2 * xRatio - 1;
+      yScene = 1 - 2 * yRatio;
+
+      QVector2D dir;
+      dir[0] = lastPos.x() - xScene; // Find how much the mouse moved
+      dir[1] = lastPos.y() - yScene;
+
+      rotX -= 200 * dir[0]; // Scale it, and update the rotaion values
+      rotY += 200 * dir[1];
+
+      updateMatrices();
+
+      lastPos[0] = xScene; // Store the new position as the last position
+      lastPos[1] = yScene;
+  }
+}
+
+void MainView::mouseReleaseEvent(QMouseEvent*) {
+  setFocus();
+  rotating = false; // Stop rotating
+}
+
+
+
+
+
+
+// ---
 
 void MainView::wheelEvent(QWheelEvent* event) {
   FoV -= event->delta() / 60.0;

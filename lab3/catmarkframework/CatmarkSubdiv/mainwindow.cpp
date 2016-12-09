@@ -47,3 +47,9 @@ void MainWindow::on_SubdivSteps_valueChanged(int value) {
 
   ui->MainDisplay->updateMeshBuffers( &Meshes[value] );
 }
+
+void MainWindow::on_checkBox_toggled(bool checked)
+{
+    ui->MainDisplay->wireframeMode = checked;
+    ui->MainDisplay->update();
+}

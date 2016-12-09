@@ -27,6 +27,8 @@ private slots:
   void on_RotationDial_valueChanged(int value);
   void on_SubdivSteps_valueChanged(int value);
 
+  void on_checkBox_toggled(bool checked);
+
 private:
   Ui::MainWindow *ui;
 };

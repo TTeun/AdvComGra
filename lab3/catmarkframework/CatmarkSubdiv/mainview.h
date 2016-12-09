@@ -18,6 +18,8 @@ public:
   MainView(QWidget *Parent = 0);
   ~MainView();
 
+  float rotX = 0, rotY = 0;
+
   bool modelLoaded;
   bool wireframeMode;
 
@@ -31,6 +33,7 @@ public:
   void updateUniforms();
   void updateMeshBuffers(Mesh* currentMesh);
 
+
 protected:
   void initializeGL();
   void resizeGL(int newWidth, int newHeight);
@@ -41,6 +44,8 @@ protected:
   void renderMesh();
 
   void mousePressEvent(QMouseEvent* event);
+  void mouseMoveEvent(QMouseEvent* event);
+  void mouseReleaseEvent(QMouseEvent*);
   void wheelEvent(QWheelEvent* event);
   void keyPressEvent(QKeyEvent* event);
 
@@ -69,6 +74,9 @@ private:
   void createShaderPrograms();
   void createBuffers();  
 
+  QVector2D lastPos;
+  bool rotating = false;
+  int selected_index = -1;
 private slots:
   void onMessageLogged( QOpenGLDebugMessage Message );
 

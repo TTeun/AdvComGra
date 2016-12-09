@@ -59,41 +59,6 @@ QGroupBox::title {
       <property name="title">
        <string>Settings</string>
       </property>
-      <widget class="QLabel" name="RotationLabel">
-       <property name="geometry">
-        <rect>
-         <x>20</x>
-         <y>110</y>
-         <width>181</width>
-         <height>20</height>
-        </rect>
-       </property>
-       <property name="text">
-        <string>Rotation around Y-axis</string>
-       </property>
-      </widget>
-      <widget class="QDial" name="RotationDial">
-       <property name="geometry">
-        <rect>
-         <x>20</x>
-         <y>130</y>
-         <width>50</width>
-         <height>64</height>
-        </rect>
-       </property>
-       <property name="maximum">
-        <number>359</number>
-       </property>
-       <property name="wrapping">
-        <bool>true</bool>
-       </property>
-       <property name="notchTarget">
-        <double>12.000000000000000</double>
-       </property>
-       <property name="notchesVisible">
-        <bool>true</bool>
-       </property>
-      </widget>
       <widget class="QSpinBox" name="SubdivSteps">
        <property name="geometry">
         <rect>
@@ -128,6 +93,22 @@ QGroupBox::title {
        </property>
        <property name="text">
         <string>Catmull-Clark steps</string>
+       </property>
+      </widget>
+      <widget class="QCheckBox" name="checkBox">
+       <property name="geometry">
+        <rect>
+         <x>30</x>
+         <y>90</y>
+         <width>87</width>
+         <height>22</height>
+        </rect>
+       </property>
+       <property name="text">
+        <string>Wireframe</string>
+       </property>
+       <property name="checked">
+        <bool>true</bool>
        </property>
       </widget>
      </widget>
