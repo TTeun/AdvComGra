@@ -6,7 +6,6 @@ MainView::MainView(QWidget *Parent) : QOpenGLWidget(Parent) {
   modelLoaded = false;
   wireframeMode = true;
 
-  rotAngle = 0.0;
   FoV = 60.0;
 }
 
@@ -33,6 +32,20 @@ void MainView::createShaderPrograms() {
   mainShaderProg->addShaderFromSourceFile(QOpenGLShader::Fragment, ":/shaders/fragshader.glsl");
 
   mainShaderProg->link();
+
+  controlMeshShader = new QOpenGLShaderProgram();
+  controlMeshShader->addShaderFromSourceFile(QOpenGLShader::Vertex, ":/shaders/vertshader.glsl");
+  controlMeshShader->addShaderFromSourceFile(QOpenGLShader::Fragment, ":/shaders/controlfragshader.glsl");
+
+  controlMeshShader->link();
+
+  tessShaderProg = new QOpenGLShaderProgram();
+  tessShaderProg->addShaderFromSourceFile(QOpenGLShader::Vertex, ":/shaders/vertshaderts.glsl");          // vertex shader without projection
+  tessShaderProg->addShaderFromSourceFile(QOpenGLShader::TessellationControl, ":/shaders/tcshader.glsl");
+  tessShaderProg->addShaderFromSourceFile(QOpenGLShader::TessellationEvaluation, ":/shaders/teshader.glsl");
+  tessShaderProg->addShaderFromSourceFile(QOpenGLShader::Fragment, ":/shaders/fragshader.glsl");
+
+  tessShaderProg->link();
 
   uniModelViewMatrix = glGetUniformLocation(mainShaderProg->programId(), "modelviewmatrix");
   uniProjectionMatrix = glGetUniformLocation(mainShaderProg->programId(), "projectionmatrix");
@@ -90,18 +103,34 @@ void MainView::updateMeshBuffers(Mesh* currentMesh) {
 
   polyIndices.clear();
   polyIndices.reserve(currentMesh->HalfEdges.size() + currentMesh->Faces.size());
+  if (not patchMode)
+      for (k=0; k<currentMesh->Faces.size(); k++) {
+          n = currentMesh->Faces[k].val;
+          currentEdge = currentMesh->Faces[k].side;
+          for (m=0; m<n; m++) {
+              polyIndices.append(currentEdge->target->index);
+              currentEdge = currentEdge->next;
+          }
+          polyIndices.append(maxInt);
+      }
 
-  for (k=0; k<currentMesh->Faces.size(); k++) {
-    n = currentMesh->Faces[k].val;
-    currentEdge = currentMesh->Faces[k].side;
-    for (m=0; m<n; m++) {
-      polyIndices.append(currentEdge->target->index);
-      currentEdge = currentEdge->next;
-    }
-    polyIndices.append(maxInt);
-  }
 
-  // ---
+  if (patchMode)
+      for (k=0; k<currentMesh->Faces.size(); k++) {
+          n = currentMesh->Faces[k].val;
+          if (n == 4){
+              currentEdge = currentMesh->Faces[k].side;
+              polyIndices.append(currentEdge->target->index);
+              polyIndices.append(currentEdge->prev->target->index);
+              polyIndices.append(currentEdge->next->target->index);
+              polyIndices.append(currentEdge->next->next->target->index);
+
+              polyIndices.append(maxInt);
+          }
+      }
+
+
+
 
   glBindBuffer(GL_ARRAY_BUFFER, meshCoordsBO);
   glBufferData(GL_ARRAY_BUFFER, sizeof(QVector3D)*vertexCoords.size(), vertexCoords.data(), GL_DYNAMIC_DRAW);
@@ -213,7 +242,8 @@ void MainView::paintGL() {
     glClearColor(0.0, 0.0, 0.0, 1.0);
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
-    mainShaderProg->bind();
+    QOpenGLShaderProgram *shaderProg = patchMode ? tessShaderProg : mainShaderProg;
+    shaderProg->bind();
 
     if (uniformUpdateRequired) {
       updateUniforms();
@@ -222,7 +252,7 @@ void MainView::paintGL() {
 
     renderMesh();
 
-    mainShaderProg->release();
+    shaderProg->release();
 
   }
 }
@@ -231,22 +261,30 @@ void MainView::paintGL() {
 
 void MainView::renderMesh() {
 
-  glBindVertexArray(meshVAO);
+  if (patchMode){
+      glBindVertexArray(meshVAO);
 
-  if (wireframeMode) {
-    glPolygonMode( GL_FRONT_AND_BACK, GL_LINE );
-    glDrawElements(GL_LINE_LOOP, meshIBOSize, GL_UNSIGNED_INT, 0);
+      glPatchParameteri(GL_PATCH_VERTICES, 4);
+      glDrawElements(GL_PATCHES, meshIBOSize, GL_UNSIGNED_INT, 0);
+      qDebug() << "assa";
   }
-  else {
-    glPolygonMode( GL_FRONT_AND_BACK, GL_FILL );
-    glDrawElements(GL_TRIANGLE_FAN, meshIBOSize, GL_UNSIGNED_INT, 0);
-  }
+  else
+  {
+      glBindVertexArray(meshVAO);
+      if (wireframeMode) {
+          glPolygonMode( GL_FRONT_AND_BACK, GL_LINE );
+          glDrawElements(GL_LINE_LOOP, meshIBOSize, GL_UNSIGNED_INT, 0);
+      }
+      else {
+          glPolygonMode( GL_FRONT_AND_BACK, GL_FILL );
+          glDrawElements(GL_TRIANGLE_FAN, meshIBOSize, GL_UNSIGNED_INT, 0);
+      }
 
-  if (selected_index > -1){ // This is to show the point selected by the user
-      glPointSize(10.0);
-      glDrawArrays(GL_POINTS, selected_index, 1);
+      if (selected_index > -1){ // This is to show the point selected by the user
+          glPointSize(10.0);
+          glDrawArrays(GL_POINTS, selected_index, 1);
+      }
   }
-
   glBindVertexArray(0);
 
 }
@@ -331,11 +369,6 @@ void MainView::mouseReleaseEvent(QMouseEvent*) {
   setFocus();
   rotating = false; // Stop rotating
 }
-
-
-
-
-
 
 // ---
 

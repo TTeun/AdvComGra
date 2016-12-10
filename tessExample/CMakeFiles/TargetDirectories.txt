@@ -1,0 +1,4 @@
+/home/teun/Documents/AGC/tessExample/CMakeFiles/edit_cache.dir
+/home/teun/Documents/AGC/tessExample/CMakeFiles/rebuild_cache.dir
+/home/teun/Documents/AGC/tessExample/CMakeFiles/BicubicPatch.dir
+/home/teun/Documents/AGC/tessExample/CMakeFiles/PezEcosystem.dir

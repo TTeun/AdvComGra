@@ -20,10 +20,10 @@ void main() {
 
   vec3 normal;
   normal = normalize(vertnormal_camera_fs);
-  
+
   vec3 surftolight = normalize(lightpos - vertcoords_camera_fs);
   float diffusecoeff = max(0.0, dot(surftolight, normal));
-  
+
   vec3 camerapos = vec3(0.0);
   vec3 surftocamera = normalize(camerapos - vertcoords_camera_fs);
   vec3 reflected = 2 * diffusecoeff * normal - surftolight;

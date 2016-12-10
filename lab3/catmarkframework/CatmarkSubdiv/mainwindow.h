@@ -19,15 +19,26 @@ public:
   explicit MainWindow(QWidget *parent = 0);
   ~MainWindow();
 
+  enum class MESH_MODE{
+      MESH,  // Show subdivided mesh
+      LIMIT  // Show limit mesh
+  };
+
   QVector<Mesh> Meshes;
+  Mesh *limitMesh;
+
   void importOBJ();
+
+private:
+  unsigned int currentMesh = 0;
 
 private slots:
   void on_ImportOBJ_clicked();
-  void on_RotationDial_valueChanged(int value);
   void on_SubdivSteps_valueChanged(int value);
-
   void on_checkBox_toggled(bool checked);
+  void on_limitPointsCB_toggled(bool checked);
+  void on_quadPatchCB_toggled(bool checked);
+  void on_controlMeshCB_toggled(bool checked);
 
 private:
   Ui::MainWindow *ui;

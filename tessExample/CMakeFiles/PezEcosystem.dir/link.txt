@@ -1,0 +1,2 @@
+/usr/bin/ar qc libPezEcosystem.a  CMakeFiles/PezEcosystem.dir/lib/glew/glew.c.o CMakeFiles/PezEcosystem.dir/lib/glsw/glsw.c.o CMakeFiles/PezEcosystem.dir/lib/glsw/bstrlib.c.o CMakeFiles/PezEcosystem.dir/lib/libpez/pez.linux.c.o
+/usr/bin/ranlib libPezEcosystem.a

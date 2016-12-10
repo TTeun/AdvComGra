@@ -5,6 +5,7 @@
 #include <QVector3D>
 
 void subdivideCatmullClark(Mesh* inputMesh, Mesh *subdivMesh);
+void toLimitMesh(Mesh* inputMesh, Mesh *limitMesh);
 
 QVector3D vertexPoint(HalfEdge* firstEdge, Mesh *newMesh);
 QVector3D edgePoint(HalfEdge* firstEdge, Mesh* newMesh);

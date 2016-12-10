@@ -18,14 +18,16 @@ public:
   MainView(QWidget *Parent = 0);
   ~MainView();
 
+  Mesh *currentMesh;
   float rotX = 0, rotY = 0;
 
   bool modelLoaded;
   bool wireframeMode;
+  bool patchMode = false;
+  bool showControlMesh = false;
 
   float FoV;
   float dispRatio;
-  float rotAngle;
 
   bool uniformUpdateRequired;
 
@@ -33,6 +35,7 @@ public:
   void updateUniforms();
   void updateMeshBuffers(Mesh* currentMesh);
 
+  Mesh* controlMesh;
 
 protected:
   void initializeGL();
@@ -60,7 +63,7 @@ private:
 
   // ---
 
-  QOpenGLShaderProgram* mainShaderProg;
+  QOpenGLShaderProgram* mainShaderProg, *tessShaderProg, *controlMeshShader;
 
   GLuint meshVAO, meshCoordsBO, meshNormalsBO, meshIndexBO;
   unsigned int meshIBOSize;

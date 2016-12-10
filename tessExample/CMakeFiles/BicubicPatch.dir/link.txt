@@ -1,0 +1,1 @@
+/usr/bin/cc     CMakeFiles/BicubicPatch.dir/BicubicPatch.c.o  -o BicubicPatch -rdynamic libPezEcosystem.a -lX11 -lGL 

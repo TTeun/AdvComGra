@@ -28,13 +28,8 @@ void MainWindow::importOBJ() {
 
 void MainWindow::on_ImportOBJ_clicked() {
   importOBJ();
-  ui->ImportOBJ->setEnabled(false);
   ui->SubdivSteps->setEnabled(true);
-}
-
-void MainWindow::on_RotationDial_valueChanged(int value) {
-  ui->MainDisplay->rotAngle = value;
-  ui->MainDisplay->updateMatrices();
+  ui->MainDisplay->controlMesh = &Meshes[0];
 }
 
 void MainWindow::on_SubdivSteps_valueChanged(int value) {
@@ -44,12 +39,39 @@ void MainWindow::on_SubdivSteps_valueChanged(int value) {
     Meshes.append(Mesh());
     subdivideCatmullClark(&Meshes[k-1], &Meshes[k]);
   }
+  currentMesh = value;
 
   ui->MainDisplay->updateMeshBuffers( &Meshes[value] );
+  ui->limitPointsCB->setChecked(false);
 }
 
 void MainWindow::on_checkBox_toggled(bool checked)
 {
     ui->MainDisplay->wireframeMode = checked;
+    ui->MainDisplay->update();
+}
+
+void MainWindow::on_limitPointsCB_toggled(bool checked)
+{
+    if (checked){
+        limitMesh = new Mesh();
+        toLimitMesh(&Meshes[currentMesh], limitMesh);
+        ui->MainDisplay->updateMeshBuffers( limitMesh );
+    } else {
+        ui->MainDisplay->updateMeshBuffers( &Meshes[currentMesh] );
+    }
+}
+
+void MainWindow::on_quadPatchCB_toggled(bool checked)
+{
+    ui->MainDisplay->patchMode = checked;
+    ui->MainDisplay->updateMeshBuffers( &Meshes[currentMesh] );
+    ui->MainDisplay->updateMatrices();
+    ui->MainDisplay->update();
+}
+
+void MainWindow::on_controlMeshCB_toggled(bool checked)
+{
+    ui->MainDisplay->showControlMesh = checked;
     ui->MainDisplay->update();
 }

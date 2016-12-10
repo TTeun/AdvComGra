@@ -333,7 +333,11 @@ compiler_rcc_clean:
 	-$(DEL_FILE) qrc_resources.cpp
 qrc_resources.cpp: ../CatmarkSubdiv/resources.qrc \
 		../CatmarkSubdiv/shaders/fragshader.glsl \
-		../CatmarkSubdiv/shaders/vertshader.glsl
+		../CatmarkSubdiv/shaders/teshader.glsl \
+		../CatmarkSubdiv/shaders/controlfragshader.glsl \
+		../CatmarkSubdiv/shaders/vertshaderts.glsl \
+		../CatmarkSubdiv/shaders/vertshader.glsl \
+		../CatmarkSubdiv/shaders/tcshader.glsl
 	/usr/lib/x86_64-linux-gnu/qt5/bin/rcc -name resources ../CatmarkSubdiv/resources.qrc -o qrc_resources.cpp
 
 compiler_moc_header_make_all: moc_mainwindow.cpp moc_mainview.cpp
@@ -396,7 +400,8 @@ mainwindow.o: ../CatmarkSubdiv/mainwindow.cpp ../CatmarkSubdiv/mainwindow.h \
 		../CatmarkSubdiv/face.h \
 		../CatmarkSubdiv/halfedge.h \
 		../CatmarkSubdiv/meshtools.h \
-		ui_mainwindow.h
+		ui_mainwindow.h \
+		../CatmarkSubdiv/mainview.h
 	$(CXX) -c $(CXXFLAGS) $(INCPATH) -o mainwindow.o ../CatmarkSubdiv/mainwindow.cpp
 
 objfile.o: ../CatmarkSubdiv/objfile.cpp ../CatmarkSubdiv/objfile.h

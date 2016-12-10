@@ -36,6 +36,9 @@ public:
     QPushButton *ImportOBJ;
     QLabel *StepsLabel;
     QCheckBox *checkBox;
+    QCheckBox *limitPointsCB;
+    QCheckBox *quadPatchCB;
+    QCheckBox *controlMeshCB;
     MainView *MainDisplay;
 
     void setupUi(QMainWindow *MainWindow)
@@ -84,6 +87,15 @@ public:
         checkBox->setObjectName(QStringLiteral("checkBox"));
         checkBox->setGeometry(QRect(30, 90, 87, 22));
         checkBox->setChecked(true);
+        limitPointsCB = new QCheckBox(SettingsGB);
+        limitPointsCB->setObjectName(QStringLiteral("limitPointsCB"));
+        limitPointsCB->setGeometry(QRect(20, 310, 87, 22));
+        quadPatchCB = new QCheckBox(SettingsGB);
+        quadPatchCB->setObjectName(QStringLiteral("quadPatchCB"));
+        quadPatchCB->setGeometry(QRect(30, 120, 161, 22));
+        controlMeshCB = new QCheckBox(SettingsGB);
+        controlMeshCB->setObjectName(QStringLiteral("controlMeshCB"));
+        controlMeshCB->setGeometry(QRect(30, 150, 131, 22));
 
         horizontalLayout->addWidget(SettingsGB);
 
@@ -106,6 +118,9 @@ public:
         ImportOBJ->setText(QApplication::translate("MainWindow", "Import OBJ file", 0));
         StepsLabel->setText(QApplication::translate("MainWindow", "Catmull-Clark steps", 0));
         checkBox->setText(QApplication::translate("MainWindow", "Wireframe", 0));
+        limitPointsCB->setText(QApplication::translate("MainWindow", "To limit", 0));
+        quadPatchCB->setText(QApplication::translate("MainWindow", "Quad Patches", 0));
+        controlMeshCB->setText(QApplication::translate("MainWindow", "Control Mesh", 0));
     } // retranslateUi
 
 };

@@ -330,3 +330,88 @@ void splitHalfEdges(Mesh* inputMesh, Mesh* subdivMesh, unsigned int numHalfEdges
   // Note that Next, Prev and Poly are not yet assigned at this point.
 
 }
+
+QVector3D faceAverage(Face* inputFace){
+    int n = inputFace->val;
+    HalfEdge* currentEdge = inputFace->side;
+    QVector3D average = QVector3D(0.0, 0.0, 0.0);
+    for (int k = 0; k < n; ++k){
+        average += currentEdge->target->coords;
+        currentEdge = currentEdge->next;
+    }
+    return average / n;
+}
+
+void toLimitMesh(Mesh* inputMesh, Mesh* limitMesh){
+    limitMesh->Vertices.reserve(inputMesh->Vertices.size());
+    limitMesh->Faces.reserve(inputMesh->Faces.size());
+    limitMesh->HalfEdges.reserve(inputMesh->HalfEdges.size());
+
+    size_t i;
+    size_t n;
+    float c;
+
+    size_t numVerts     = inputMesh->Vertices.size();
+    size_t numHalfEdges = inputMesh->HalfEdges.size();
+    size_t numFaces     = inputMesh->Faces.size();
+
+    Vertex* currentVertex;
+    Vertex limitVertex;
+    HalfEdge* currentEdge;
+    QVector3D coords;
+    for (i = 0; i < numVerts; ++i){
+        currentVertex = &inputMesh->Vertices[i];
+        n = currentVertex->val;
+
+        // Deep copy the values so we do not accidentally alter inputMesh
+        limitVertex.val = n;
+        limitVertex.index = i;
+        limitVertex.sharpness = currentVertex->sharpness;
+
+        currentEdge = currentVertex->out;
+
+        if (HalfEdge* boundaryEdge = vertOnBoundary(currentVertex)) {
+            limitVertex.coords = boundaryEdge->target->coords;
+            limitVertex.coords += 4.0 * boundaryEdge->prev->target->coords;
+            limitVertex.coords += boundaryEdge->prev->twin->target->coords;
+            limitVertex.coords /= 6.0;
+        }
+        else
+        {
+            coords = currentVertex->coords;
+
+            // "Approximating Subdivision Surfaces with Gregory Patches for Hardware Tessellation" by Charles Loop Et Al.
+            limitVertex.coords = (n - 3) * coords / ((float) (n + 5));
+            c = 4 / ((float)(n * (n + 5)));
+            for (size_t k = 0; k < n; ++k){
+                limitVertex.coords += 0.5 * c * (coords + currentEdge->target->coords);
+                limitVertex.coords += c * faceAverage(currentEdge->polygon);
+                currentEdge = currentEdge->prev->twin;
+            }
+        }
+        limitMesh->Vertices.append(limitVertex);
+    }
+
+    // The next section simply copies the topological connectivity from inputMesh
+    for (i = 0; i < numHalfEdges; ++i)
+        limitMesh->HalfEdges.append(inputMesh->HalfEdges[i]);
+
+    for (i = 0; i < numVerts; ++i)
+        limitMesh->Vertices[i].out = &limitMesh->HalfEdges[inputMesh->Vertices[i].out->index];
+
+    for (i = 0; i < numHalfEdges; ++i){
+        limitMesh->HalfEdges[i].target = &limitMesh->Vertices[inputMesh->HalfEdges[i].target->index];
+        limitMesh->HalfEdges[i].next = &limitMesh->HalfEdges[inputMesh->HalfEdges[i].next->index];
+        limitMesh->HalfEdges[i].prev = &limitMesh->HalfEdges[inputMesh->HalfEdges[i].prev->index];
+        limitMesh->HalfEdges[i].twin = &limitMesh->HalfEdges[inputMesh->HalfEdges[i].twin->index];
+    }
+
+    for (i = 0; i < numFaces; ++i)
+        limitMesh->Faces.append(inputMesh->Faces[i]);
+
+    for (i = 0; i < numFaces; ++i)
+        limitMesh->Faces[i].side = &limitMesh->HalfEdges[inputMesh->Faces[i].side->index];
+    qDebug() << "Limit points constructed";
+}
+
+
