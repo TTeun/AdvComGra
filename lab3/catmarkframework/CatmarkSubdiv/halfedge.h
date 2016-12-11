@@ -14,7 +14,7 @@ public:
   HalfEdge* twin;
   Face* polygon;
   unsigned int index;
-  unsigned short sharpness;
+  float sharpness;
 
   // Inline constructors
 

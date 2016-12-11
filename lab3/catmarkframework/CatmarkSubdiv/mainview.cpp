@@ -17,9 +17,19 @@ MainView::~MainView() {
   glDeleteBuffers(1, &meshIndexBO);
   glDeleteVertexArrays(1, &meshVAO);
 
+  glDeleteBuffers(1, &ctrlCoordsBO);
+  glDeleteBuffers(1, &ctrlIndexBO);
+  glDeleteVertexArrays(1, &ctrlVAO);
+
+  glDeleteBuffers(1, &slctCoordsBO);
+  glDeleteBuffers(1, &slctIndexBO);
+  glDeleteVertexArrays(1, &slctVAO);
+
   debugLogger->stopLogging();
 
   delete mainShaderProg;
+  delete tessShaderProg;
+  delete controlMeshShader;
 }
 
 // ---
@@ -115,7 +125,47 @@ void MainView::createBuffers() {
   glBindVertexArray(0);
 }
 
-void MainView::updateMeshBuffers(Mesh* currentMesh) {
+void MainView::buildCtrlMesh(){
+    firstPass = false;
+    unsigned int k, n, m;
+    HalfEdge* currentEdge;
+    ctrlCoords.clear();
+    ctrlCoords.reserve(Meshes[0].Vertices.size());
+
+    ctrlIndices.clear();
+    ctrlIndices.reserve(Meshes[0].HalfEdges.size() + Meshes[0].Faces.size());
+
+    for (k=0; k<(GLuint)Meshes[0].Vertices.size(); k++) {
+      ctrlCoords.append(Meshes[0].Vertices[k].coords);
+      ctrlColours.append(QVector3D(0.6, 0.8, 0.0));
+    }
+    for (k=0; k<(GLuint)Meshes[0].Faces.size(); k++) {
+        n = Meshes[0].Faces[k].val;
+        currentEdge = Meshes[0].Faces[k].side;
+        for (m=0; m<n; m++) {
+            if (currentEdge->index < currentEdge->twin->index){
+                ctrlIndices.append(currentEdge->twin->target->index);
+                ctrlIndices.append(currentEdge->target->index);
+            }
+            currentEdge = currentEdge->next;
+        }
+        ctrlIndices.append(maxInt);
+    }
+
+    glBindBuffer(GL_ARRAY_BUFFER, ctrlCoordsBO);
+    glBufferData(GL_ARRAY_BUFFER, sizeof(QVector3D)*ctrlCoords.size(), ctrlCoords.data(), GL_DYNAMIC_DRAW);
+
+    glBindBuffer(GL_ARRAY_BUFFER, ctrlColourBO);
+    glBufferData(GL_ARRAY_BUFFER, sizeof(QVector3D)*ctrlColours.size(), ctrlColours.data(), GL_DYNAMIC_DRAW);
+
+    qDebug() << " → Updated ctrlCoordsBO";
+
+    glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, ctrlIndexBO);
+    glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(unsigned int)*ctrlIndices.size(), ctrlIndices.data(), GL_DYNAMIC_DRAW);
+
+}
+
+void MainView::updateMeshBuffers(Mesh *currentMesh) {
 
   qDebug() << ".. updateBuffers";
 
@@ -124,42 +174,7 @@ void MainView::updateMeshBuffers(Mesh* currentMesh) {
   HalfEdge* currentEdge;
 
   if (firstPass){
-      firstPass = false;
-
-      ctrlCoords.clear();
-      ctrlCoords.reserve(currentMesh->Vertices.size());
-
-      ctrlIndices.clear();
-      ctrlIndices.reserve(currentMesh->HalfEdges.size() + currentMesh->Faces.size());
-
-      for (k=0; k<(GLuint)currentMesh->Vertices.size(); k++) {
-        ctrlCoords.append(currentMesh->Vertices[k].coords);
-        ctrlColours.append(QVector3D(0.6, 0.6, 0.6));
-      }
-      for (k=0; k<(GLuint)currentMesh->Faces.size(); k++) {
-          n = currentMesh->Faces[k].val;
-          currentEdge = currentMesh->Faces[k].side;
-          for (m=0; m<n; m++) {
-              if (currentEdge->index < currentEdge->twin->index){
-                  ctrlIndices.append(currentEdge->twin->target->index);
-                  ctrlIndices.append(currentEdge->target->index);
-              }
-              currentEdge = currentEdge->next;
-          }
-          ctrlIndices.append(maxInt);
-      }
-
-      glBindBuffer(GL_ARRAY_BUFFER, ctrlCoordsBO);
-      glBufferData(GL_ARRAY_BUFFER, sizeof(QVector3D)*ctrlCoords.size(), ctrlCoords.data(), GL_DYNAMIC_DRAW);
-
-      glBindBuffer(GL_ARRAY_BUFFER, ctrlColourBO);
-      glBufferData(GL_ARRAY_BUFFER, sizeof(QVector3D)*ctrlColours.size(), ctrlColours.data(), GL_DYNAMIC_DRAW);
-
-      qDebug() << " → Updated ctrlCoordsBO";
-
-      glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, ctrlIndexBO);
-      glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(unsigned int)*ctrlIndices.size(), ctrlIndices.data(), GL_DYNAMIC_DRAW);
-
+      buildCtrlMesh();
   }
 
   vertexCoords.clear();
@@ -336,27 +351,14 @@ void MainView::paintGL() {
         controlMeshShader->bind();
         updateUniforms();
         glBindVertexArray(ctrlVAO);
-        glPolygonMode( GL_FRONT_AND_BACK, GL_LINE );
         glDrawElements(GL_LINES, ctrlIndices.size(), GL_UNSIGNED_INT, 0);
 
         if (selected_index != -1){
             glBindVertexArray(slctVAO);
-            glPolygonMode( GL_FRONT_AND_BACK, GL_LINE );
             glDrawElements(GL_LINES, slctCoords.size(), GL_UNSIGNED_INT, 0);
         }
         controlMeshShader->release();
     }
-//    if (selected_index > -1){ // This is to show the point selected by the user
-//        controlMeshShader->bind();
-//        updateUniforms();
-//        glBindVertexArray(ctrlVAO);
-
-//        glPointSize(10.0);
-//        glDrawArrays(GL_POINTS, selected_index, 1);
-
-//        controlMeshShader->release();
-//    }
-
   }
 }
 
@@ -403,21 +405,14 @@ void MainView::mousePressEvent(QMouseEvent* event) {
   }
   if (event->button() == Qt::LeftButton){ // If Left button pressed
 
-      // We send a ray out into the scene and find the closest vertex to it
+      // We send a ray out into the scene and find the closest edge to it
 
-      // Unproject the ray from NDS
       QVector4D ray_eye = (projectionMatrix.inverted()) * QVector4D(xScene, yScene, -1.0, 1.0);
       ray_eye[2] = -1.0;
       ray_eye[3] = 0.0; //  The ray is a direction, not a position
-
-      // Invert the modelview
       QMatrix4x4 MV = modelViewMatrix.inverted();
       QVector4D ray_f = MV * ray_eye;
-
-      // This is the direction the ray shoots in
       QVector3D ray_final = (QVector3D(ray_f[0], ray_f[1], ray_f[2])).normalized();
-
-      // This is the origin of the ray in world coordinates
       QVector4D lastCol = MV.column(3);
       QVector3D origin = QVector3D(lastCol[0], lastCol[1], lastCol[2]);
 
@@ -458,8 +453,8 @@ void MainView::mousePressEvent(QMouseEvent* event) {
       }
 
       selected_index = minIndex;
-      qDebug() << minDist;
-      qDebug() << minIndex;
+
+      mainWindow->setSharpness(Meshes[0].HalfEdges[selected_index].sharpness);
       updateMatrices();
 
       slctCoords.clear();

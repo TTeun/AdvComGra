@@ -1,5 +1,9 @@
 #include "meshtools.h"
 
+float max(double a, double b){
+    return a > b ? a : b;
+}
+
 void subdivideCatmullClark(Mesh* inputMesh, Mesh* subdivMesh) {
   unsigned int numVerts, numHalfEdges, numFaces, sumFaceValences;
   unsigned int k, m, s, t;
@@ -153,6 +157,10 @@ void subdivideCatmullClark(Mesh* inputMesh, Mesh* subdivMesh) {
   qDebug() << "   # HalfEdges:" << subdivMesh->HalfEdges.size();
   qDebug() << "   # Faces:" << subdivMesh->Faces.size();
 
+  for (int i = 0; i < inputMesh->HalfEdges.size(); ++i){
+      subdivMesh->HalfEdges[2 * i].sharpness = max(inputMesh->HalfEdges[i].sharpness - 1.0, 0.0);
+      subdivMesh->HalfEdges[2 * i + 1].sharpness = max(inputMesh->HalfEdges[i].sharpness - 1.0, 0.0);
+  }
 }
 
 // ---
@@ -160,8 +168,8 @@ void subdivideCatmullClark(Mesh* inputMesh, Mesh* subdivMesh) {
 QVector3D vertexPoint(HalfEdge* firstEdge, Mesh* subdivMesh) {
   unsigned short k, n;
   QVector3D sumStarPts, sumFacePts;
-  QVector3D vertexPt;
-  float stencilValue;
+  QVector3D vertexPt = QVector3D(0.0, 0.0, 0.0);
+
   HalfEdge* currentEdge;
   Vertex* currentVertex;
 
@@ -172,11 +180,39 @@ QVector3D vertexPoint(HalfEdge* firstEdge, Mesh* subdivMesh) {
   sumFacePts = QVector3D();
   currentEdge = firstEdge;
 
+  float sharpness = 0.0;
+  int incidentCreases = 0;
+  currentEdge = firstEdge;
+  for (int i = 0; i < n; ++i){
+      if (currentEdge->sharpness > 0.0){
+          sharpness += currentEdge->sharpness;
+          ++incidentCreases;
+          vertexPt += currentEdge->target->coords;
+      }
+      currentEdge = currentEdge->prev->twin;
+  }
+
+  // (*) At this point, vertexPt is the sum of the vertices connected to currentVertex by sharp edges.
+  if (incidentCreases >= 3) // Vertex is a corner
+      return currentVertex->coords;
+
+  if (incidentCreases == 2){
+      vertexPt += 6.0 * currentVertex->coords;
+      vertexPt /= 8.0;
+      if (sharpness < 2.0){
+          sharpness /= 2; // Average edge sharpness of incident edges
+          vertexPt *= sharpness; // Weighted by average incident sharpness
+          vertexPt += (1-sharpness) * currentVertex->coords;
+      }
+      return vertexPt;
+  }
+
+
   // Catmull-Clark (also supporting initial meshes containing n-gons)
   if (HalfEdge* boundaryEdge = vertOnBoundary(currentVertex)) {
     if (boundaryEdge->twin->target->val == 2) {
       // Interpolate corners
-      vertexPt = boundaryEdge->twin->target->coords;
+      return boundaryEdge->twin->target->coords;
     }
     else {
       vertexPt  = 1.0 * boundaryEdge->target->coords;
@@ -207,18 +243,26 @@ QVector3D edgePoint(HalfEdge* firstEdge, Mesh* subdivMesh) {
   currentEdge = firstEdge;
 
   // Catmull-Clark (also supporting initial meshes containing n-gons)
-  if (!currentEdge->polygon || !currentEdge->twin->polygon) {
-    EdgePt  = 4.0 * currentEdge->target->coords;
-    EdgePt += 4.0 * currentEdge->twin->target->coords;
-    EdgePt /= 8.0;
+  EdgePt  = currentEdge->target->coords;
+  EdgePt += currentEdge->twin->target->coords;
+  float sharpness = currentEdge->sharpness;
+  if (!currentEdge->polygon || !currentEdge->twin->polygon || sharpness > 1.0)
+    return EdgePt / 2.0;
+
+  if (sharpness > 0.0){
+      QVector3D smoothPt;
+      smoothPt  = currentEdge->target->coords;
+      smoothPt += currentEdge->twin->target->coords;
+      smoothPt += subdivMesh->Vertices[currentEdge->polygon->index].coords;
+      smoothPt += subdivMesh->Vertices[currentEdge->twin->polygon->index].coords;
+      smoothPt /= 4.0;
+
+      return sharpness* EdgePt / 2.0 + (1-sharpness) * smoothPt;
   }
-  else {
-    EdgePt  = currentEdge->target->coords;
-    EdgePt += currentEdge->twin->target->coords;
-    EdgePt += subdivMesh->Vertices[currentEdge->polygon->index].coords;
-    EdgePt += subdivMesh->Vertices[currentEdge->twin->polygon->index].coords;
-    EdgePt /= 4.0;
-  }
+
+  EdgePt += subdivMesh->Vertices[currentEdge->polygon->index].coords;
+  EdgePt += subdivMesh->Vertices[currentEdge->twin->polygon->index].coords;
+  EdgePt /= 4.0;
 
   return EdgePt;
 

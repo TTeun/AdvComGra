@@ -16,7 +16,7 @@ Mesh::Mesh(OBJFile* loadedOBJFile) {
   numVertices = loadedOBJFile->vertexCoords.size();
   numHalfEdges = 0;
 
-  for (k=0; k<loadedOBJFile->faceValences.size(); k++) {
+  for (k=0; k<(unsigned int)loadedOBJFile->faceValences.size(); k++) {
     numHalfEdges += loadedOBJFile->faceValences[k];
   }
 
@@ -62,7 +62,7 @@ Mesh::Mesh(OBJFile* loadedOBJFile) {
                                 nullptr,
                                 nullptr,
                                 &Faces[m],
-                                indexH));
+                                indexH, 0));
 
       // Next, Prev and Twin of the above HalfEdge have to be assigned later! Starting below...
 
@@ -91,7 +91,7 @@ Mesh::Mesh(OBJFile* loadedOBJFile) {
   qDebug() << "   # HalfEdges" << HalfEdges.capacity() << HalfEdges.size();
 
   // Outs and Valences of vertices
-  for (k=0; k<Vertices.size(); k++) {
+  for (k=0; k<(unsigned int)Vertices.size(); k++) {
     if (PotentialTwins[k].size() == 0) {
       qWarning() << " ! Isolated Vertex? PotentialTwins empty for Index" << k;
       dispVertInfo(k);
@@ -179,7 +179,7 @@ void Mesh::setTwins(unsigned int numHalfEdges, unsigned int indexH) {
                                  nullptr,
                                  initialEdge,
                                  nullptr,
-                                 indexH ));
+                                 indexH , 0));
       startBoundaryLoop = indexH;
       // Twin of initialEdge should be assigned AFTER the central while loop!
       indexH++;
@@ -200,7 +200,7 @@ void Mesh::setTwins(unsigned int numHalfEdges, unsigned int indexH) {
                                    &HalfEdges[indexH-1],
                                    currentEdge,
                                    nullptr,
-                                   indexH ));
+                                   indexH, 0 ));
         HalfEdges[indexH-1].next = &HalfEdges[indexH];
 
         currentEdge->target->val += 1;

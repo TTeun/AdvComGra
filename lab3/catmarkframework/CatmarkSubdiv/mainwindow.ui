@@ -59,6 +59,9 @@ QGroupBox::title {
       <property name="title">
        <string>Settings</string>
       </property>
+      <property name="checkable">
+       <bool>false</bool>
+      </property>
       <widget class="QSpinBox" name="SubdivSteps">
        <property name="geometry">
         <rect>
@@ -115,7 +118,7 @@ QGroupBox::title {
        <property name="geometry">
         <rect>
          <x>20</x>
-         <y>310</y>
+         <y>300</y>
          <width>87</width>
          <height>22</height>
         </rect>
@@ -148,6 +151,42 @@ QGroupBox::title {
        </property>
        <property name="text">
         <string>Control Mesh</string>
+       </property>
+      </widget>
+      <widget class="QDoubleSpinBox" name="sharpnessSlider">
+       <property name="geometry">
+        <rect>
+         <x>20</x>
+         <y>460</y>
+         <width>62</width>
+         <height>27</height>
+        </rect>
+       </property>
+      </widget>
+      <widget class="QLabel" name="label">
+       <property name="geometry">
+        <rect>
+         <x>20</x>
+         <y>430</y>
+         <width>111</width>
+         <height>17</height>
+        </rect>
+       </property>
+       <property name="text">
+        <string>Sharpness</string>
+       </property>
+      </widget>
+      <widget class="QPushButton" name="sharpnessPB">
+       <property name="geometry">
+        <rect>
+         <x>90</x>
+         <y>460</y>
+         <width>111</width>
+         <height>27</height>
+        </rect>
+       </property>
+       <property name="text">
+        <string>Apply Sharpness</string>
        </property>
       </widget>
      </widget>

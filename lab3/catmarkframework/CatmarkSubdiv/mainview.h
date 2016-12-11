@@ -9,6 +9,7 @@
 
 #include <QMouseEvent>
 #include "mesh.h"
+#include "mainwindow.h"
 
 class MainView : public QOpenGLWidget, protected QOpenGLFunctions_4_1_Core {
 
@@ -18,6 +19,7 @@ public:
   MainView(QWidget *Parent = 0);
   ~MainView();
 
+  MainWindow *mainWindow;
   float rotX = 0, rotY = 0;
 
   size_t currentMesh = 0;
@@ -33,12 +35,20 @@ public:
 
   bool uniformUpdateRequired;
 
+  enum MODE{
+      LIMITMESH,
+      DIVMESH
+  };
+
   void updateMatrices();
   void updateUniforms();
-  void updateMeshBuffers(Mesh* currentMesh);
+  void updateMeshBuffers(Mesh *currentMesh);
 
   QVector<Mesh> Meshes;
-
+  Mesh *limitMesh;
+  void *setSharpnessSlider(double sharpness);
+  int selected_index = -1;
+  float newSharpness;
 protected:
   void initializeGL();
   void resizeGL(int newWidth, int newHeight);
@@ -88,10 +98,10 @@ private:
 
   void createShaderPrograms();
   void createBuffers();  
+  void buildCtrlMesh();
 
   QVector2D lastPos;
   bool rotating = false;
-  int selected_index = -1;
 private slots:
   void onMessageLogged( QOpenGLDebugMessage Message );
 

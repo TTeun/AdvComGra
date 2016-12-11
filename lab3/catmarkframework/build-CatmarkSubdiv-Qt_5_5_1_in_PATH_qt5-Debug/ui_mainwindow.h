@@ -14,6 +14,7 @@
 #include <QtWidgets/QApplication>
 #include <QtWidgets/QButtonGroup>
 #include <QtWidgets/QCheckBox>
+#include <QtWidgets/QDoubleSpinBox>
 #include <QtWidgets/QGroupBox>
 #include <QtWidgets/QHBoxLayout>
 #include <QtWidgets/QHeaderView>
@@ -39,6 +40,9 @@ public:
     QCheckBox *limitPointsCB;
     QCheckBox *quadPatchCB;
     QCheckBox *controlMeshCB;
+    QDoubleSpinBox *sharpnessSlider;
+    QLabel *label;
+    QPushButton *sharpnessPB;
     MainView *MainDisplay;
 
     void setupUi(QMainWindow *MainWindow)
@@ -74,6 +78,7 @@ public:
         sizePolicy.setHeightForWidth(SettingsGB->sizePolicy().hasHeightForWidth());
         SettingsGB->setSizePolicy(sizePolicy);
         SettingsGB->setMinimumSize(QSize(220, 0));
+        SettingsGB->setCheckable(false);
         SubdivSteps = new QSpinBox(SettingsGB);
         SubdivSteps->setObjectName(QStringLiteral("SubdivSteps"));
         SubdivSteps->setGeometry(QRect(20, 260, 181, 29));
@@ -89,13 +94,22 @@ public:
         checkBox->setChecked(true);
         limitPointsCB = new QCheckBox(SettingsGB);
         limitPointsCB->setObjectName(QStringLiteral("limitPointsCB"));
-        limitPointsCB->setGeometry(QRect(20, 310, 87, 22));
+        limitPointsCB->setGeometry(QRect(20, 300, 87, 22));
         quadPatchCB = new QCheckBox(SettingsGB);
         quadPatchCB->setObjectName(QStringLiteral("quadPatchCB"));
         quadPatchCB->setGeometry(QRect(30, 120, 161, 22));
         controlMeshCB = new QCheckBox(SettingsGB);
         controlMeshCB->setObjectName(QStringLiteral("controlMeshCB"));
         controlMeshCB->setGeometry(QRect(30, 150, 131, 22));
+        sharpnessSlider = new QDoubleSpinBox(SettingsGB);
+        sharpnessSlider->setObjectName(QStringLiteral("sharpnessSlider"));
+        sharpnessSlider->setGeometry(QRect(20, 460, 62, 27));
+        label = new QLabel(SettingsGB);
+        label->setObjectName(QStringLiteral("label"));
+        label->setGeometry(QRect(20, 430, 111, 17));
+        sharpnessPB = new QPushButton(SettingsGB);
+        sharpnessPB->setObjectName(QStringLiteral("sharpnessPB"));
+        sharpnessPB->setGeometry(QRect(90, 460, 111, 27));
 
         horizontalLayout->addWidget(SettingsGB);
 
@@ -121,6 +135,8 @@ public:
         limitPointsCB->setText(QApplication::translate("MainWindow", "To limit", 0));
         quadPatchCB->setText(QApplication::translate("MainWindow", "Quad Patches", 0));
         controlMeshCB->setText(QApplication::translate("MainWindow", "Control Mesh", 0));
+        label->setText(QApplication::translate("MainWindow", "Sharpness", 0));
+        sharpnessPB->setText(QApplication::translate("MainWindow", "Apply Sharpness", 0));
     } // retranslateUi
 
 };

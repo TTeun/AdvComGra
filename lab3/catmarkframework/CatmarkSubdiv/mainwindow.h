@@ -6,6 +6,7 @@
 #include <QFileDialog>
 #include "mesh.h"
 #include "meshtools.h"
+#include <QDoubleSpinBox>
 
 namespace Ui {
 class MainWindow;
@@ -24,11 +25,9 @@ public:
       LIMIT  // Show limit mesh
   };
 
-  QVector<Mesh> Meshes;
-  Mesh *limitMesh;
-
   void importOBJ();
-
+  Ui::MainWindow *ui;
+  void setSharpness(double value);
 private:
   unsigned int currentMesh = 0;
 
@@ -39,9 +38,11 @@ private slots:
   void on_limitPointsCB_toggled(bool checked);
   void on_quadPatchCB_toggled(bool checked);
   void on_controlMeshCB_toggled(bool checked);
+  void on_sharpnessSlider_editingFinished();
+
+  void on_sharpnessPB_clicked();
 
 private:
-  Ui::MainWindow *ui;
 };
 
 #endif // MAINWINDOW_H
