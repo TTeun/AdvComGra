@@ -18,9 +18,9 @@ public:
   MainView(QWidget *Parent = 0);
   ~MainView();
 
-  Mesh *currentMesh;
   float rotX = 0, rotY = 0;
 
+  size_t currentMesh = 0;
   bool modelLoaded;
   bool wireframeMode;
   bool patchMode = false;
@@ -29,13 +29,15 @@ public:
   float FoV;
   float dispRatio;
 
+  bool firstPass = true;
+
   bool uniformUpdateRequired;
 
   void updateMatrices();
   void updateUniforms();
   void updateMeshBuffers(Mesh* currentMesh);
 
-  Mesh* controlMesh;
+  QVector<Mesh> Meshes;
 
 protected:
   void initializeGL();
@@ -66,6 +68,8 @@ private:
   QOpenGLShaderProgram* mainShaderProg, *tessShaderProg, *controlMeshShader;
 
   GLuint meshVAO, meshCoordsBO, meshNormalsBO, meshIndexBO;
+  GLuint ctrlVAO, ctrlCoordsBO, ctrlIndexBO, ctrlColourBO;
+  GLuint slctVAO, slctCoordsBO, slctIndexBO, slctColourBO;
   unsigned int meshIBOSize;
 
   // ---
@@ -73,6 +77,14 @@ private:
   QVector<QVector3D> vertexCoords;
   QVector<QVector3D> vertexNormals;
   QVector<unsigned int> polyIndices;
+
+  QVector<QVector3D> ctrlCoords;
+  QVector<QVector3D> ctrlColours;
+  QVector<unsigned int> ctrlIndices;
+
+  QVector<QVector3D> slctCoords;
+  QVector<QVector3D> slctColours;
+  QVector<unsigned int> slctlIndices;
 
   void createShaderPrograms();
   void createBuffers();  

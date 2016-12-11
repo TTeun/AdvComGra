@@ -14,12 +14,12 @@ void main()
   vertnormal_camera_te[gl_InvocationID] = vertnormal_camera_vs[gl_InvocationID];
 
     if (gl_InvocationID == 0) {
-        gl_TessLevelInner[0] = 3.0;
-        gl_TessLevelInner[1] = 3.0;
-        gl_TessLevelOuter[0] = 3.0;
-        gl_TessLevelOuter[1] = 3.0;
-        gl_TessLevelOuter[2] = 3.0;
-        gl_TessLevelOuter[3] = 3.0;
+        gl_TessLevelInner[0] = 4.0;
+        gl_TessLevelInner[1] = 4.0;
+        gl_TessLevelOuter[0] = 4.0;
+        gl_TessLevelOuter[1] = 4.0;
+        gl_TessLevelOuter[2] = 4.0;
+        gl_TessLevelOuter[3] = 4.0;
     }
 }
 

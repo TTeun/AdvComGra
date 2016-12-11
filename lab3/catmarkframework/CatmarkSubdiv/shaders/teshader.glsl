@@ -13,7 +13,7 @@ uniform mat4 projectionmatrix;
 
 void main()
 {
-    float u = gl_TessCoord.x, v = gl_TessCoord.y;
+    float u = gl_TessCoord.x, v = gl_TessCoord.y; // Coordinates in the unit (u,v) plane
 
     vec3 a = mix(vertcoords_camera_tcs[0], vertcoords_camera_tcs[1], u);
     vec3 b = mix(vertcoords_camera_tcs[2], vertcoords_camera_tcs[3], u);

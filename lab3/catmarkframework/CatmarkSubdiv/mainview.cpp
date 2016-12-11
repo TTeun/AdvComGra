@@ -72,6 +72,46 @@ void MainView::createBuffers() {
   glGenBuffers(1, &meshIndexBO);
   glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, meshIndexBO);
 
+
+  glBindVertexArray(0);
+
+  // Control Mesh
+
+  glGenVertexArrays(1, &ctrlVAO);
+  glBindVertexArray(ctrlVAO);
+
+  glGenBuffers(1, &ctrlCoordsBO);
+  glBindBuffer(GL_ARRAY_BUFFER, ctrlCoordsBO);
+  glEnableVertexAttribArray(0);
+  glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 0, 0);
+
+  glGenBuffers(1, &ctrlColourBO);
+  glBindBuffer(GL_ARRAY_BUFFER, ctrlColourBO);
+  glEnableVertexAttribArray(2);
+  glVertexAttribPointer(2, 3, GL_FLOAT, GL_FALSE, 0, 0);
+
+  glGenBuffers(1, &ctrlIndexBO);
+  glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, ctrlIndexBO);
+
+  // VAO for showing the selected line
+
+  glGenVertexArrays(1, &slctVAO);
+  glBindVertexArray(slctVAO);
+
+  glGenBuffers(1, &slctCoordsBO);
+  glBindBuffer(GL_ARRAY_BUFFER, slctCoordsBO);
+  glEnableVertexAttribArray(0);
+  glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 0, 0);
+
+  glGenBuffers(1, &slctColourBO);
+  glBindBuffer(GL_ARRAY_BUFFER, slctColourBO);
+  glEnableVertexAttribArray(2);
+  glVertexAttribPointer(2, 3, GL_FLOAT, GL_FALSE, 0, 0);
+
+  glGenBuffers(1, &slctIndexBO);
+  glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, slctIndexBO);
+
+
   glBindVertexArray(0);
 }
 
@@ -83,40 +123,68 @@ void MainView::updateMeshBuffers(Mesh* currentMesh) {
   unsigned short n, m;
   HalfEdge* currentEdge;
 
+  if (firstPass){
+      firstPass = false;
+
+      ctrlCoords.clear();
+      ctrlCoords.reserve(currentMesh->Vertices.size());
+
+      ctrlIndices.clear();
+      ctrlIndices.reserve(currentMesh->HalfEdges.size() + currentMesh->Faces.size());
+
+      for (k=0; k<(GLuint)currentMesh->Vertices.size(); k++) {
+        ctrlCoords.append(currentMesh->Vertices[k].coords);
+        ctrlColours.append(QVector3D(0.6, 0.6, 0.6));
+      }
+      for (k=0; k<(GLuint)currentMesh->Faces.size(); k++) {
+          n = currentMesh->Faces[k].val;
+          currentEdge = currentMesh->Faces[k].side;
+          for (m=0; m<n; m++) {
+              if (currentEdge->index < currentEdge->twin->index){
+                  ctrlIndices.append(currentEdge->twin->target->index);
+                  ctrlIndices.append(currentEdge->target->index);
+              }
+              currentEdge = currentEdge->next;
+          }
+          ctrlIndices.append(maxInt);
+      }
+
+      glBindBuffer(GL_ARRAY_BUFFER, ctrlCoordsBO);
+      glBufferData(GL_ARRAY_BUFFER, sizeof(QVector3D)*ctrlCoords.size(), ctrlCoords.data(), GL_DYNAMIC_DRAW);
+
+      glBindBuffer(GL_ARRAY_BUFFER, ctrlColourBO);
+      glBufferData(GL_ARRAY_BUFFER, sizeof(QVector3D)*ctrlColours.size(), ctrlColours.data(), GL_DYNAMIC_DRAW);
+
+      qDebug() << " → Updated ctrlCoordsBO";
+
+      glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, ctrlIndexBO);
+      glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(unsigned int)*ctrlIndices.size(), ctrlIndices.data(), GL_DYNAMIC_DRAW);
+
+  }
+
   vertexCoords.clear();
   vertexCoords.reserve(currentMesh->Vertices.size());
 
-  for (k=0; k<currentMesh->Vertices.size(); k++) {
+  for (k=0; k<(GLuint)currentMesh->Vertices.size(); k++) {
     vertexCoords.append(currentMesh->Vertices[k].coords);
   }
 
   vertexNormals.clear();
   vertexNormals.reserve(currentMesh->Vertices.size());
 
-  for (k=0; k<currentMesh->Faces.size(); k++) {
+  for (k=0; k<(GLuint)currentMesh->Faces.size(); k++) {
     currentMesh->setFaceNormal(&currentMesh->Faces[k]);
   }
 
-  for (k=0; k<currentMesh->Vertices.size(); k++) {
+  for (k=0; k<(GLuint)currentMesh->Vertices.size(); k++) {
     vertexNormals.append( currentMesh->computeVertexNormal(&currentMesh->Vertices[k]) );
   }
 
   polyIndices.clear();
   polyIndices.reserve(currentMesh->HalfEdges.size() + currentMesh->Faces.size());
-  if (not patchMode)
-      for (k=0; k<currentMesh->Faces.size(); k++) {
-          n = currentMesh->Faces[k].val;
-          currentEdge = currentMesh->Faces[k].side;
-          for (m=0; m<n; m++) {
-              polyIndices.append(currentEdge->target->index);
-              currentEdge = currentEdge->next;
-          }
-          polyIndices.append(maxInt);
-      }
 
-
-  if (patchMode)
-      for (k=0; k<currentMesh->Faces.size(); k++) {
+  if (patchMode) // Indexing for quad patches is different and we skip ngons with n != 4
+      for (k=0; k<(GLuint)currentMesh->Faces.size(); k++) {
           n = currentMesh->Faces[k].val;
           if (n == 4){
               currentEdge = currentMesh->Faces[k].side;
@@ -128,6 +196,17 @@ void MainView::updateMeshBuffers(Mesh* currentMesh) {
               polyIndices.append(maxInt);
           }
       }
+  else
+      for (k=0; k<(GLuint)currentMesh->Faces.size(); k++) {
+          n = currentMesh->Faces[k].val;
+          currentEdge = currentMesh->Faces[k].side;
+          for (m=0; m<n; m++) {
+              polyIndices.append(currentEdge->target->index);
+              currentEdge = currentEdge->next;
+          }
+          polyIndices.append(maxInt);
+      }
+
 
 
 
@@ -251,8 +330,32 @@ void MainView::paintGL() {
     }
 
     renderMesh();
-
     shaderProg->release();
+    if (showControlMesh)
+    {
+        controlMeshShader->bind();
+        updateUniforms();
+        glBindVertexArray(ctrlVAO);
+        glPolygonMode( GL_FRONT_AND_BACK, GL_LINE );
+        glDrawElements(GL_LINES, ctrlIndices.size(), GL_UNSIGNED_INT, 0);
+
+        if (selected_index != -1){
+            glBindVertexArray(slctVAO);
+            glPolygonMode( GL_FRONT_AND_BACK, GL_LINE );
+            glDrawElements(GL_LINES, slctCoords.size(), GL_UNSIGNED_INT, 0);
+        }
+        controlMeshShader->release();
+    }
+//    if (selected_index > -1){ // This is to show the point selected by the user
+//        controlMeshShader->bind();
+//        updateUniforms();
+//        glBindVertexArray(ctrlVAO);
+
+//        glPointSize(10.0);
+//        glDrawArrays(GL_POINTS, selected_index, 1);
+
+//        controlMeshShader->release();
+//    }
 
   }
 }
@@ -261,31 +364,24 @@ void MainView::paintGL() {
 
 void MainView::renderMesh() {
 
-  if (patchMode){
-      glBindVertexArray(meshVAO);
+    glBindVertexArray(meshVAO);
+    if (patchMode){
+        glPatchParameteri(GL_PATCH_VERTICES, 4);
+        glDrawElements(GL_PATCHES, meshIBOSize, GL_UNSIGNED_INT, 0);
+    }
+    else
+    {
+        if (wireframeMode) {
+            glPolygonMode( GL_FRONT_AND_BACK, GL_LINE );
+            glDrawElements(GL_LINE_LOOP, meshIBOSize, GL_UNSIGNED_INT, 0);
+        }
+        else {
+            glPolygonMode( GL_FRONT_AND_BACK, GL_FILL );
+            glDrawElements(GL_TRIANGLE_FAN, meshIBOSize, GL_UNSIGNED_INT, 0);
+        }
+    }
 
-      glPatchParameteri(GL_PATCH_VERTICES, 4);
-      glDrawElements(GL_PATCHES, meshIBOSize, GL_UNSIGNED_INT, 0);
-      qDebug() << "assa";
-  }
-  else
-  {
-      glBindVertexArray(meshVAO);
-      if (wireframeMode) {
-          glPolygonMode( GL_FRONT_AND_BACK, GL_LINE );
-          glDrawElements(GL_LINE_LOOP, meshIBOSize, GL_UNSIGNED_INT, 0);
-      }
-      else {
-          glPolygonMode( GL_FRONT_AND_BACK, GL_FILL );
-          glDrawElements(GL_TRIANGLE_FAN, meshIBOSize, GL_UNSIGNED_INT, 0);
-      }
-
-      if (selected_index > -1){ // This is to show the point selected by the user
-          glPointSize(10.0);
-          glDrawArrays(GL_POINTS, selected_index, 1);
-      }
-  }
-  glBindVertexArray(0);
+    glBindVertexArray(0);
 
 }
 
@@ -325,18 +421,73 @@ void MainView::mousePressEvent(QMouseEvent* event) {
       QVector4D lastCol = MV.column(3);
       QVector3D origin = QVector3D(lastCol[0], lastCol[1], lastCol[2]);
 
+      // ray = origin + t * ray_final, with -infty < t < infty
+      // HalfEdge = p0 + s * (p1 - p0), with 0 <= s <= 1
+
+
+//      QVector3D n;
+//      HalfEdge *currentEdge;
+//      for (int i = 0; i < Meshes[0].HalfEdges.size(); ++i){
+//          currentEdge = Meshes[0].HalfEdges[i];
+//          n = QVector3D::crossProduct(dir, currentEdge->target->coords - currentEdge->twin->target->coords);
+//          dist = ctrlCoords[i].distanceToLine(origin, ray_final); // Nice Qt helper function
+//          if (dist < minDist){
+//              minDist = dist;
+//              minIndex = i;
+//          }
+//      }
+
       // We now look for the vertex that minimizes the distance to this ray
       float dist, minDist = 1000.0;
       int minIndex = 0;
-      for (int i = 0; i < vertexCoords.size(); ++i){
-          dist = vertexCoords[i].distanceToLine(origin, ray_final); // Nice Qt helper function
+
+      QVector3D n;
+      HalfEdge *currentEdge;
+      for (int i = 0; i < Meshes[0].HalfEdges.size(); ++i)
+      {
+          currentEdge = &Meshes[0].HalfEdges[i];
+          n = QVector3D::crossProduct(ray_final, currentEdge->target->coords - currentEdge->twin->target->coords);
+          n = n.normalized();
+          dist = (QVector3D::dotProduct(n, (origin - currentEdge->target->coords)));
+          dist = dist < 0 ? (-dist) : dist;
           if (dist < minDist){
               minDist = dist;
               minIndex = i;
           }
       }
-      selected_index = minDist < 0.03 ? minIndex : -1;
+
+      selected_index = minIndex;
+      qDebug() << minDist;
+      qDebug() << minIndex;
       updateMatrices();
+
+      slctCoords.clear();
+      slctCoords.squeeze();
+
+      slctColours.clear();
+      slctColours.squeeze();
+
+      slctColours.append( QVector3D(1.0,0.0,0.0));
+      slctColours.append( QVector3D(1.0,0.0,0.0));
+
+      slctCoords.append(Meshes[0].HalfEdges[selected_index].target->coords);
+      slctCoords.append(Meshes[0].HalfEdges[selected_index].twin->target->coords);
+
+      slctlIndices.clear();
+      slctlIndices.squeeze();
+
+      slctlIndices.append(0);
+      slctlIndices.append(1);
+
+      glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, slctIndexBO);
+      glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(unsigned int)*slctlIndices.size(), slctlIndices.data(), GL_DYNAMIC_DRAW);
+
+      glBindBuffer(GL_ARRAY_BUFFER, slctCoordsBO);
+      glBufferData(GL_ARRAY_BUFFER, sizeof(QVector3D)*slctCoords.size(), slctCoords.data(), GL_DYNAMIC_DRAW);
+
+      glBindBuffer(GL_ARRAY_BUFFER, slctColourBO);
+      glBufferData(GL_ARRAY_BUFFER, sizeof(QVector3D)*slctColours.size(), slctColours.data(), GL_DYNAMIC_DRAW);
+
   }
 }
 

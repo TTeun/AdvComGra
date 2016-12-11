@@ -16,32 +16,33 @@ MainWindow::~MainWindow() {
 
 void MainWindow::importOBJ() {
   OBJFile newModel = OBJFile(QFileDialog::getOpenFileName(this, "Import OBJ File", "models/", tr("Obj Files (*.obj)")));
-  Meshes.clear();
-  Meshes.squeeze();
-  Meshes.append( Mesh(&newModel) );
+  ui->MainDisplay->Meshes.clear();
+  ui->MainDisplay->Meshes.squeeze();
+  ui->MainDisplay->Meshes.append( Mesh(&newModel) );
 
-  ui->MainDisplay->updateMeshBuffers( &Meshes[0] );
+  ui->MainDisplay->updateMeshBuffers( &ui->MainDisplay->Meshes[0] );
   ui->MainDisplay->modelLoaded = true;
 
   ui->MainDisplay->update();
 }
 
 void MainWindow::on_ImportOBJ_clicked() {
+  ui->MainDisplay->firstPass = true;
   importOBJ();
   ui->SubdivSteps->setEnabled(true);
-  ui->MainDisplay->controlMesh = &Meshes[0];
 }
 
 void MainWindow::on_SubdivSteps_valueChanged(int value) {
   unsigned short k;
 
-  for (k=Meshes.size(); k<value+1; k++) {
-    Meshes.append(Mesh());
-    subdivideCatmullClark(&Meshes[k-1], &Meshes[k]);
+  for (k=ui->MainDisplay->Meshes.size(); k<value+1; k++) {
+    ui->MainDisplay->Meshes.append(Mesh());
+    subdivideCatmullClark(&ui->MainDisplay->Meshes[k-1], &ui->MainDisplay->Meshes[k]);
   }
   currentMesh = value;
+  ui->MainDisplay->currentMesh = value;
 
-  ui->MainDisplay->updateMeshBuffers( &Meshes[value] );
+  ui->MainDisplay->updateMeshBuffers( &ui->MainDisplay->Meshes[value] );
   ui->limitPointsCB->setChecked(false);
 }
 
@@ -55,17 +56,17 @@ void MainWindow::on_limitPointsCB_toggled(bool checked)
 {
     if (checked){
         limitMesh = new Mesh();
-        toLimitMesh(&Meshes[currentMesh], limitMesh);
+        toLimitMesh(&ui->MainDisplay->Meshes[currentMesh], limitMesh);
         ui->MainDisplay->updateMeshBuffers( limitMesh );
     } else {
-        ui->MainDisplay->updateMeshBuffers( &Meshes[currentMesh] );
+        ui->MainDisplay->updateMeshBuffers( &ui->MainDisplay->Meshes[currentMesh] );
     }
 }
 
 void MainWindow::on_quadPatchCB_toggled(bool checked)
 {
     ui->MainDisplay->patchMode = checked;
-    ui->MainDisplay->updateMeshBuffers( &Meshes[currentMesh] );
+    ui->MainDisplay->updateMeshBuffers( &ui->MainDisplay->Meshes[currentMesh] );
     ui->MainDisplay->updateMatrices();
     ui->MainDisplay->update();
 }

@@ -11,7 +11,7 @@ void main() {
   vec3 lightpos = vec3(3.0, 0.0, 2.0);
   vec3 lightcolour = vec3(1.0);
 
-  vec3 matcolour = vec3(0.53, 0.80, 0.87);
+  vec3 matcolour = 1.1 * vec3(0.53, 0.80, 0.87);
   vec3 matspeccolour = vec3(1.0);
 
   float matambientcoeff = 0.2;
