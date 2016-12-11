@@ -83,8 +83,8 @@ private:
   QVector<unsigned int> ctrlIndices;
 
   QVector<QVector3D> slctCoords;
-  QVector<QVector3D> slctColours;
-  QVector<unsigned int> slctlIndices;
+  QVector<QVector3D> slctColours = {QVector3D(1.0, 0.0, 0.0), QVector3D(1.0, 0.0, 0.0)};
+  QVector<unsigned int> slctlIndices = {0, 1};
 
   void createShaderPrograms();
   void createBuffers();  

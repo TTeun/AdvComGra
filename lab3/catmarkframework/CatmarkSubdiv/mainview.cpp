@@ -424,32 +424,33 @@ void MainView::mousePressEvent(QMouseEvent* event) {
       // ray = origin + t * ray_final, with -infty < t < infty
       // HalfEdge = p0 + s * (p1 - p0), with 0 <= s <= 1
 
-
-//      QVector3D n;
-//      HalfEdge *currentEdge;
-//      for (int i = 0; i < Meshes[0].HalfEdges.size(); ++i){
-//          currentEdge = Meshes[0].HalfEdges[i];
-//          n = QVector3D::crossProduct(dir, currentEdge->target->coords - currentEdge->twin->target->coords);
-//          dist = ctrlCoords[i].distanceToLine(origin, ray_final); // Nice Qt helper function
-//          if (dist < minDist){
-//              minDist = dist;
-//              minIndex = i;
-//          }
-//      }
-
-      // We now look for the vertex that minimizes the distance to this ray
       float dist, minDist = 1000.0;
       int minIndex = 0;
 
-      QVector3D n;
+      QVector3D n, n2, p1, p2, d1, d2;
+      float s;
       HalfEdge *currentEdge;
+      d2 = ray_final;
+      p2 = origin;
       for (int i = 0; i < Meshes[0].HalfEdges.size(); ++i)
       {
           currentEdge = &Meshes[0].HalfEdges[i];
-          n = QVector3D::crossProduct(ray_final, currentEdge->target->coords - currentEdge->twin->target->coords);
+          d1 =  currentEdge->twin->target->coords - currentEdge->target->coords;
+
+          n = QVector3D::crossProduct(ray_final, d1);
           n = n.normalized();
-          dist = (QVector3D::dotProduct(n, (origin - currentEdge->target->coords)));
-          dist = dist < 0 ? (-dist) : dist;
+
+          n2 = QVector3D::crossProduct(n, d2);
+          p1 = currentEdge->target->coords;
+
+          s = QVector3D::dotProduct((p2 - p1), n2) / QVector3D::dotProduct(d1, n2);
+          if ((s < 0) || (s > 1))
+              dist = 1000.0;
+          else {
+              dist = QVector3D::dotProduct(n, (origin - p1));
+              dist = dist < 0 ? (-dist) : dist;
+          }
+
           if (dist < minDist){
               minDist = dist;
               minIndex = i;
@@ -464,20 +465,8 @@ void MainView::mousePressEvent(QMouseEvent* event) {
       slctCoords.clear();
       slctCoords.squeeze();
 
-      slctColours.clear();
-      slctColours.squeeze();
-
-      slctColours.append( QVector3D(1.0,0.0,0.0));
-      slctColours.append( QVector3D(1.0,0.0,0.0));
-
       slctCoords.append(Meshes[0].HalfEdges[selected_index].target->coords);
       slctCoords.append(Meshes[0].HalfEdges[selected_index].twin->target->coords);
-
-      slctlIndices.clear();
-      slctlIndices.squeeze();
-
-      slctlIndices.append(0);
-      slctlIndices.append(1);
 
       glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, slctIndexBO);
       glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(unsigned int)*slctlIndices.size(), slctlIndices.data(), GL_DYNAMIC_DRAW);
