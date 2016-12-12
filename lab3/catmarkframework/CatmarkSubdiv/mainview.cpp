@@ -210,7 +210,7 @@ void MainView::updateMeshBuffers(Mesh *currentMesh) {
   polyIndices.clear();
   polyIndices.reserve(currentMesh->HalfEdges.size() + currentMesh->Faces.size());
   bool isRegular;
-  if (patchMode) // Indexing for quad patches is different and we skip ngons with n != 4
+  if (showQuadPatch) // Indexing for quad patches is different and we skip ngons with n != 4
       for (k=0; k<(GLuint)currentMesh->Faces.size(); k++) {
           n = currentMesh->Faces[k].val;
           isRegular = true;
@@ -299,7 +299,7 @@ void MainView::updateUniforms() {
     glUniformMatrix3fv(uniNormalMatrix, 1, false, normalMatrix.data());
     mainShaderProg->release();
 
-    if (patchMode){
+    if (showQuadPatch){
         tessShaderProg->bind();
         glUniform1f(uniTessLevelInner, tessLevelInner);
         glUniform1f(uniTessLevelOuter, tessLevelOuter);
@@ -375,10 +375,30 @@ void MainView::paintGL() {
 
     updateUniforms();
 
-    QOpenGLShaderProgram *shaderProg = patchMode ? tessShaderProg : mainShaderProg;
-    shaderProg->bind();
-    renderMesh();
-    shaderProg->release();
+    if (showQuadPatch)
+    {
+        glBindVertexArray(meshVAO);
+        tessShaderProg->bind();
+        glPolygonMode( GL_FRONT_AND_BACK, GL_LINE );
+        glPatchParameteri(GL_PATCH_VERTICES, 4);
+        glDrawElements(GL_PATCHES, meshIBOSize, GL_UNSIGNED_INT, 0);
+        tessShaderProg->release();
+    }
+    else if (showModel)
+        {
+            glBindVertexArray(meshVAO);
+            mainShaderProg->bind();
+            if (wireframeMode) {
+                glPolygonMode( GL_FRONT_AND_BACK, GL_LINE );
+                glDrawElements(GL_LINE_LOOP, meshIBOSize, GL_UNSIGNED_INT, 0);
+            }
+            else {
+                glPolygonMode( GL_FRONT_AND_BACK, GL_FILL );
+                glDrawElements(GL_TRIANGLE_FAN, meshIBOSize, GL_UNSIGNED_INT, 0);
+            }
+            mainShaderProg->release();
+        }
+
     if (showControlMesh)
     {
         controlMeshShader->bind();
@@ -392,31 +412,6 @@ void MainView::paintGL() {
         controlMeshShader->release();
     }
   }
-}
-
-// ---
-
-void MainView::renderMesh() {
-
-    glBindVertexArray(meshVAO);
-    if (patchMode){
-        glPatchParameteri(GL_PATCH_VERTICES, 4);
-        glDrawElements(GL_PATCHES, meshIBOSize, GL_UNSIGNED_INT, 0);
-    }
-    else
-    {
-        if (wireframeMode) {
-            glPolygonMode( GL_FRONT_AND_BACK, GL_LINE );
-            glDrawElements(GL_LINE_LOOP, meshIBOSize, GL_UNSIGNED_INT, 0);
-        }
-        else {
-            glPolygonMode( GL_FRONT_AND_BACK, GL_FILL );
-            glDrawElements(GL_TRIANGLE_FAN, meshIBOSize, GL_UNSIGNED_INT, 0);
-        }
-    }
-
-    glBindVertexArray(0);
-
 }
 
 void MainView::mousePressEvent(QMouseEvent* event) {

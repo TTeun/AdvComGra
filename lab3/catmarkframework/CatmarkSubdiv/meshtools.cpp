@@ -234,36 +234,36 @@ QVector3D vertexPoint(HalfEdge* firstEdge, Mesh* subdivMesh) {
 
 }
 
-QVector3D edgePoint(HalfEdge* firstEdge, Mesh* subdivMesh) {
-  QVector3D EdgePt;
-  HalfEdge* currentEdge;
+QVector3D ccEdgePoint(HalfEdge *currentEdge, Mesh *subdivMesh){
+    QVector3D point;
+    point  = currentEdge->target->coords;
+    point += currentEdge->twin->target->coords;
+    point += subdivMesh->Vertices[currentEdge->polygon->index].coords;
+    point += subdivMesh->Vertices[currentEdge->twin->polygon->index].coords;
+    return point / 4.0;
+}
 
-  EdgePt = QVector3D();
+QVector3D avEdgePoint(HalfEdge *currentEdge){
+    QVector3D point;
+    point = currentEdge->target->coords;
+    point += currentEdge->twin->target->coords;
+    return point / 2.0;
+}
+
+QVector3D edgePoint(HalfEdge* firstEdge, Mesh* subdivMesh) {
+  HalfEdge* currentEdge;
   currentEdge = firstEdge;
 
-  // Catmull-Clark (also supporting initial meshes containing n-gons)
-  EdgePt  = currentEdge->target->coords;
-  EdgePt += currentEdge->twin->target->coords;
   float sharpness = currentEdge->sharpness;
-  if (!currentEdge->polygon || !currentEdge->twin->polygon || sharpness > 1.0)
-    return EdgePt / 2.0;
+  if (!currentEdge->polygon || !currentEdge->twin->polygon || sharpness > 1.0) // Edge is boundary or sharpness > 1.0
+    return avEdgePoint(currentEdge);
 
-  if (sharpness > 0.0){
-      QVector3D smoothPt;
-      smoothPt  = currentEdge->target->coords;
-      smoothPt += currentEdge->twin->target->coords;
-      smoothPt += subdivMesh->Vertices[currentEdge->polygon->index].coords;
-      smoothPt += subdivMesh->Vertices[currentEdge->twin->polygon->index].coords;
-      smoothPt /= 4.0;
-
-      return sharpness* EdgePt / 2.0 + (1-sharpness) * smoothPt;
+  if (sharpness > 0.0){ // sharpness  > 0.0, lerp between smooth and sharp
+      return sharpness * avEdgePoint(currentEdge) + (1-sharpness) * ccEdgePoint(currentEdge, subdivMesh);
   }
 
-  EdgePt += subdivMesh->Vertices[currentEdge->polygon->index].coords;
-  EdgePt += subdivMesh->Vertices[currentEdge->twin->polygon->index].coords;
-  EdgePt /= 4.0;
-
-  return EdgePt;
+  // Edge is smmooth
+  return ccEdgePoint(currentEdge, subdivMesh);
 }
 
 QVector3D facePoint(HalfEdge* firstEdge) {

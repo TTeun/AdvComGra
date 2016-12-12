@@ -34,17 +34,16 @@ private:
 private slots:
   void on_ImportOBJ_clicked();
   void on_SubdivSteps_valueChanged(int value);
-  void on_checkBox_toggled(bool checked);
+  void on_wireFrameCB_toggled(bool checked);
   void on_limitPointsCB_toggled(bool checked);
   void on_quadPatchCB_toggled(bool checked);
   void on_controlMeshCB_toggled(bool checked);
   void on_sharpnessSlider_editingFinished();
-
   void on_innerLevelSB_valueChanged(int arg1);
-
   void on_outerLevelSB_valueChanged(int arg1);
-
   void on_gridLinesCB_toggled(bool checked);
+  void on_applySharpnessPB_released();
+  void on_showModelCB_toggled(bool checked);
 
 private:
 };

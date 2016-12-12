@@ -47,7 +47,7 @@ void MainWindow::on_SubdivSteps_valueChanged(int value) {
   ui->limitPointsCB->setChecked(false);
 }
 
-void MainWindow::on_checkBox_toggled(bool checked)
+void MainWindow::on_wireFrameCB_toggled(bool checked)
 {
     ui->MainDisplay->wireframeMode = checked;
     ui->MainDisplay->update();
@@ -66,16 +66,19 @@ void MainWindow::on_limitPointsCB_toggled(bool checked)
 
 void MainWindow::on_quadPatchCB_toggled(bool checked)
 {
-    ui->MainDisplay->patchMode = checked;
+    ui->MainDisplay->showQuadPatch = checked;
     ui->MainDisplay->updateMeshBuffers( &ui->MainDisplay->Meshes[currentMesh] );
 
     // Show the quad ui features
     ui->quadPatchGB->setEnabled(checked);
     ui->innerLevelSB->setEnabled(checked);
     ui->outerLevelSB->setEnabled(checked);
-    ui->label_2->setEnabled(checked);
-    ui->label_3->setEnabled(checked);
+    ui->innerLevelLabel->setEnabled(checked);
+    ui->outerLevelLabel->setEnabled(checked);
     ui->gridLinesCB->setEnabled(checked);
+
+    ui->showModelCB->setEnabled(not checked);
+    ui->wireFrameCB->setEnabled(not checked);
 
     ui->MainDisplay->updateMatrices();
     ui->MainDisplay->update();
@@ -84,6 +87,18 @@ void MainWindow::on_quadPatchCB_toggled(bool checked)
 void MainWindow::on_controlMeshCB_toggled(bool checked)
 {
     ui->MainDisplay->showControlMesh = checked;
+    ui->MainDisplay->update();
+}
+
+void MainWindow::on_gridLinesCB_toggled(bool checked)
+{
+    ui->MainDisplay->showGridLines = checked;
+    ui->MainDisplay->update();
+}
+
+void MainWindow::on_showModelCB_toggled(bool checked)
+{
+    ui->MainDisplay->showModel = checked;
     ui->MainDisplay->update();
 }
 
@@ -98,19 +113,6 @@ void MainWindow::on_sharpnessSlider_editingFinished()
     currentEdge = &ui->MainDisplay->Meshes[0].HalfEdges[ui->MainDisplay->selected_index];
     currentEdge->sharpness = ui->sharpnessSlider->value();
     currentEdge->twin->sharpness = ui->sharpnessSlider->value();
-
-    ui->MainDisplay->Meshes.resize(1);
-    unsigned short k;
-    int value = ui->SubdivSteps->value();
-    for (k=ui->MainDisplay->Meshes.size(); k<value+1; k++) {
-      ui->MainDisplay->Meshes.append(Mesh());
-      subdivideCatmullClark(&ui->MainDisplay->Meshes[k-1], &ui->MainDisplay->Meshes[k]);
-    }
-    currentMesh = value;
-    ui->MainDisplay->currentMesh = value;
-
-    ui->MainDisplay->updateMeshBuffers( &ui->MainDisplay->Meshes[value] );
-    ui->limitPointsCB->setChecked(false);
 
 }
 
@@ -127,8 +129,23 @@ void MainWindow::on_outerLevelSB_valueChanged(int arg1)
     ui->MainDisplay->updateMatrices();
 }
 
-void MainWindow::on_gridLinesCB_toggled(bool checked)
+
+void MainWindow::on_applySharpnessPB_released()
 {
-    ui->MainDisplay->showGridLines = checked;
-    ui->MainDisplay->updateMatrices();
+    ui->MainDisplay->Meshes.resize(1);
+    ui->MainDisplay->Meshes.squeeze();
+
+    unsigned short k;
+    int value = ui->SubdivSteps->value();
+    for (k=ui->MainDisplay->Meshes.size(); k<value+1; k++) {
+      ui->MainDisplay->Meshes.append(Mesh());
+      subdivideCatmullClark(&ui->MainDisplay->Meshes[k-1], &ui->MainDisplay->Meshes[k]);
+    }
+
+    currentMesh = value;
+    ui->MainDisplay->currentMesh = value;
+
+    ui->MainDisplay->updateMeshBuffers( &ui->MainDisplay->Meshes[value] );
+    ui->limitPointsCB->setChecked(false);
 }
+

@@ -25,7 +25,7 @@ public:
   size_t currentMesh = 0;
   bool modelLoaded;
   bool wireframeMode;
-  bool patchMode = false;
+  bool showQuadPatch = false;
   bool showControlMesh = false;
 
   float FoV;
@@ -51,6 +51,7 @@ public:
   float tessLevelInner = 4.0;
   float tessLevelOuter = 4.0;
   bool showGridLines = false;
+  bool showModel = true;
 
 protected:
   void initializeGL();
@@ -58,8 +59,6 @@ protected:
   void paintGL();
 
   unsigned int maxInt;
-
-  void renderMesh();
 
   void mousePressEvent(QMouseEvent* event);
   void mouseMoveEvent(QMouseEvent* event);
