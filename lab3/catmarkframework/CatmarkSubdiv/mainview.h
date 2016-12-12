@@ -33,7 +33,6 @@ public:
 
   bool firstPass = true;
 
-  bool uniformUpdateRequired;
 
   enum MODE{
       LIMITMESH,
@@ -48,7 +47,10 @@ public:
   Mesh *limitMesh;
   void *setSharpnessSlider(double sharpness);
   int selected_index = -1;
-  float newSharpness;
+
+  float tessLevelInner = 4.0;
+  float tessLevelOuter = 4.0;
+
 protected:
   void initializeGL();
   void resizeGL(int newWidth, int newHeight);
@@ -72,6 +74,12 @@ private:
 
   // Uniforms
   GLint uniModelViewMatrix, uniProjectionMatrix, uniNormalMatrix;
+  GLint ctrlUniModelViewMatrix, ctrlUniProjectionMatrix, ctrlUniNormalMatrix;
+  GLint tessUniModelViewMatrix, tessUniProjectionMatrix, tessUniNormalMatrix;
+  GLint uniTessLevelInner;
+  GLint uniTessLevelOuter;
+
+
 
   // ---
 

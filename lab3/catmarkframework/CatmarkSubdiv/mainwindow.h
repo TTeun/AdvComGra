@@ -40,7 +40,9 @@ private slots:
   void on_controlMeshCB_toggled(bool checked);
   void on_sharpnessSlider_editingFinished();
 
-  void on_sharpnessPB_clicked();
+  void on_innerLevelSB_valueChanged(int arg1);
+
+  void on_outerLevelSB_valueChanged(int arg1);
 
 private:
 };

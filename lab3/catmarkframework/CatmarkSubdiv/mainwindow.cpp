@@ -68,6 +68,14 @@ void MainWindow::on_quadPatchCB_toggled(bool checked)
 {
     ui->MainDisplay->patchMode = checked;
     ui->MainDisplay->updateMeshBuffers( &ui->MainDisplay->Meshes[currentMesh] );
+
+    // Show the quad ui features
+    ui->quadPatchGB->setEnabled(checked);
+    ui->innerLevelSB->setEnabled(checked);
+    ui->outerLevelSB->setEnabled(checked);
+    ui->label_2->setEnabled(checked);
+    ui->label_3->setEnabled(checked);
+
     ui->MainDisplay->updateMatrices();
     ui->MainDisplay->update();
 }
@@ -79,9 +87,8 @@ void MainWindow::on_controlMeshCB_toggled(bool checked)
 }
 
 void MainWindow::setSharpness(double value){
-    ui->sharpnessSlider->blockSignals(true);
     ui->sharpnessSlider->setValue(value);
-    ui->sharpnessSlider->blockSignals(false);
+
 }
 
 void MainWindow::on_sharpnessSlider_editingFinished()
@@ -90,11 +97,7 @@ void MainWindow::on_sharpnessSlider_editingFinished()
     currentEdge = &ui->MainDisplay->Meshes[0].HalfEdges[ui->MainDisplay->selected_index];
     currentEdge->sharpness = ui->sharpnessSlider->value();
     currentEdge->twin->sharpness = ui->sharpnessSlider->value();
-}
 
-void MainWindow::on_sharpnessPB_clicked()
-{
-    qDebug() << "Re dividing surface";
     ui->MainDisplay->Meshes.resize(1);
     unsigned short k;
     int value = ui->SubdivSteps->value();
@@ -108,4 +111,17 @@ void MainWindow::on_sharpnessPB_clicked()
     ui->MainDisplay->updateMeshBuffers( &ui->MainDisplay->Meshes[value] );
     ui->limitPointsCB->setChecked(false);
 
+}
+
+
+void MainWindow::on_innerLevelSB_valueChanged(int arg1)
+{
+    ui->MainDisplay->tessLevelInner = arg1;
+    ui->MainDisplay->updateMatrices();
+}
+
+void MainWindow::on_outerLevelSB_valueChanged(int arg1)
+{
+    ui->MainDisplay->tessLevelOuter = arg1;
+    ui->MainDisplay->updateMatrices();
 }

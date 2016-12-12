@@ -60,6 +60,17 @@ void MainView::createShaderPrograms() {
   uniModelViewMatrix = glGetUniformLocation(mainShaderProg->programId(), "modelviewmatrix");
   uniProjectionMatrix = glGetUniformLocation(mainShaderProg->programId(), "projectionmatrix");
   uniNormalMatrix = glGetUniformLocation(mainShaderProg->programId(), "normalmatrix");
+
+  ctrlUniModelViewMatrix = glGetUniformLocation(controlMeshShader->programId(), "modelviewmatrix");
+  ctrlUniProjectionMatrix = glGetUniformLocation(controlMeshShader->programId(), "projectionmatrix");
+  ctrlUniNormalMatrix = glGetUniformLocation(controlMeshShader->programId(), "normalmatrix");
+
+  tessUniModelViewMatrix = glGetUniformLocation(tessShaderProg->programId(), "modelviewmatrix");
+  tessUniProjectionMatrix = glGetUniformLocation(tessShaderProg->programId(), "projectionmatrix");
+  tessUniNormalMatrix = glGetUniformLocation(tessShaderProg->programId(), "normalmatrix");
+  uniTessLevelInner = glGetUniformLocation(tessShaderProg->programId(), "TessLevelInner");
+  uniTessLevelOuter = glGetUniformLocation(tessShaderProg->programId(), "TessLevelOuter");
+
 }
 
 void MainView::createBuffers() {
@@ -81,7 +92,6 @@ void MainView::createBuffers() {
 
   glGenBuffers(1, &meshIndexBO);
   glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, meshIndexBO);
-
 
   glBindVertexArray(0);
 
@@ -197,18 +207,27 @@ void MainView::updateMeshBuffers(Mesh *currentMesh) {
 
   polyIndices.clear();
   polyIndices.reserve(currentMesh->HalfEdges.size() + currentMesh->Faces.size());
-
+  bool isRegular;
   if (patchMode) // Indexing for quad patches is different and we skip ngons with n != 4
       for (k=0; k<(GLuint)currentMesh->Faces.size(); k++) {
           n = currentMesh->Faces[k].val;
-          if (n == 4){
+          isRegular = true;
+          if (n == 4)
+          {
               currentEdge = currentMesh->Faces[k].side;
-              polyIndices.append(currentEdge->target->index);
-              polyIndices.append(currentEdge->prev->target->index);
-              polyIndices.append(currentEdge->next->target->index);
-              polyIndices.append(currentEdge->next->next->target->index);
+              for (int j = 0; j < 4; ++j){
+                  if (currentEdge->target->val != 4 && currentEdge->twin->polygon)
+                      isRegular = false;
+                  currentEdge = currentEdge->next;
+              }
+              if (isRegular){
+                  polyIndices.append(currentEdge->target->index);
+                  polyIndices.append(currentEdge->prev->target->index);
+                  polyIndices.append(currentEdge->next->target->index);
+                  polyIndices.append(currentEdge->next->next->target->index);
 
-              polyIndices.append(maxInt);
+                  polyIndices.append(maxInt);
+              }
           }
       }
   else
@@ -266,21 +285,36 @@ void MainView::updateMatrices() {
 
   normalMatrix = modelViewMatrix.normalMatrix();
 
-  uniformUpdateRequired = true;
   update();
 
 }
 
 void MainView::updateUniforms() {
 
-  // mainShaderProg should be bound at this point!
+    mainShaderProg->bind();
+    glUniformMatrix4fv(uniModelViewMatrix, 1, false, modelViewMatrix.data());
+    glUniformMatrix4fv(uniProjectionMatrix, 1, false, projectionMatrix.data());
+    glUniformMatrix3fv(uniNormalMatrix, 1, false, normalMatrix.data());
+    mainShaderProg->release();
 
-  glUniformMatrix4fv(uniModelViewMatrix, 1, false, modelViewMatrix.data());
-  glUniformMatrix4fv(uniProjectionMatrix, 1, false, projectionMatrix.data());
-  glUniformMatrix3fv(uniNormalMatrix, 1, false, normalMatrix.data());
+    if (patchMode){
+        tessShaderProg->bind();
+        glUniform1f(uniTessLevelInner, tessLevelInner);
+        glUniform1f(uniTessLevelOuter, tessLevelOuter);
+        glUniformMatrix4fv(tessUniModelViewMatrix, 1, false, modelViewMatrix.data());
+        glUniformMatrix4fv(tessUniProjectionMatrix, 1, false, projectionMatrix.data());
+        glUniformMatrix3fv(tessUniNormalMatrix, 1, false, normalMatrix.data());
+        tessShaderProg->release();
+    }
 
+    if (showControlMesh){
+        controlMeshShader->bind();
+        glUniformMatrix4fv(ctrlUniModelViewMatrix, 1, false, modelViewMatrix.data());
+        glUniformMatrix4fv(ctrlUniProjectionMatrix, 1, false, projectionMatrix.data());
+        glUniformMatrix3fv(ctrlUniNormalMatrix, 1, false, normalMatrix.data());
+        controlMeshShader->release();
+    }
 }
-
 // ---
 
 void MainView::initializeGL() {
@@ -336,20 +370,15 @@ void MainView::paintGL() {
     glClearColor(0.0, 0.0, 0.0, 1.0);
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
+    updateUniforms();
+
     QOpenGLShaderProgram *shaderProg = patchMode ? tessShaderProg : mainShaderProg;
     shaderProg->bind();
-
-    if (uniformUpdateRequired) {
-      updateUniforms();
-      uniformUpdateRequired = false;
-    }
-
     renderMesh();
     shaderProg->release();
     if (showControlMesh)
     {
         controlMeshShader->bind();
-        updateUniforms();
         glBindVertexArray(ctrlVAO);
         glDrawElements(GL_LINES, ctrlIndices.size(), GL_UNSIGNED_INT, 0);
 
@@ -453,6 +482,8 @@ void MainView::mousePressEvent(QMouseEvent* event) {
       }
 
       selected_index = minIndex;
+
+      qDebug() << Meshes[0].HalfEdges[selected_index].target->val;
 
       mainWindow->setSharpness(Meshes[0].HalfEdges[selected_index].sharpness);
       updateMatrices();

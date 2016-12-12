@@ -62,7 +62,7 @@ Mesh::Mesh(OBJFile* loadedOBJFile) {
                                 nullptr,
                                 nullptr,
                                 &Faces[m],
-                                indexH, 0));
+                                indexH));
 
       // Next, Prev and Twin of the above HalfEdge have to be assigned later! Starting below...
 
@@ -179,7 +179,7 @@ void Mesh::setTwins(unsigned int numHalfEdges, unsigned int indexH) {
                                  nullptr,
                                  initialEdge,
                                  nullptr,
-                                 indexH , 0));
+                                 indexH ));
       startBoundaryLoop = indexH;
       // Twin of initialEdge should be assigned AFTER the central while loop!
       indexH++;
@@ -200,7 +200,7 @@ void Mesh::setTwins(unsigned int numHalfEdges, unsigned int indexH) {
                                    &HalfEdges[indexH-1],
                                    currentEdge,
                                    nullptr,
-                                   indexH, 0 ));
+                                   indexH ));
         HalfEdges[indexH-1].next = &HalfEdges[indexH];
 
         currentEdge->target->val += 1;

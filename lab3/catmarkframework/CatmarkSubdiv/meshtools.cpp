@@ -192,7 +192,7 @@ QVector3D vertexPoint(HalfEdge* firstEdge, Mesh* subdivMesh) {
       currentEdge = currentEdge->prev->twin;
   }
 
-  // (*) At this point, vertexPt is the sum of the vertices connected to currentVertex by sharp edges.
+  // At this point, vertexPt is the sum of the vertices connected to currentVertex by sharp edges.
   if (incidentCreases >= 3) // Vertex is a corner
       return currentVertex->coords;
 
@@ -201,12 +201,11 @@ QVector3D vertexPoint(HalfEdge* firstEdge, Mesh* subdivMesh) {
       vertexPt /= 8.0;
       if (sharpness < 2.0){
           sharpness /= 2; // Average edge sharpness of incident edges
-          vertexPt *= sharpness; // Weighted by average incident sharpness
+          vertexPt *= sharpness;
           vertexPt += (1-sharpness) * currentVertex->coords;
       }
       return vertexPt;
   }
-
 
   // Catmull-Clark (also supporting initial meshes containing n-gons)
   if (HalfEdge* boundaryEdge = vertOnBoundary(currentVertex)) {
@@ -265,7 +264,6 @@ QVector3D edgePoint(HalfEdge* firstEdge, Mesh* subdivMesh) {
   EdgePt /= 4.0;
 
   return EdgePt;
-
 }
 
 QVector3D facePoint(HalfEdge* firstEdge) {

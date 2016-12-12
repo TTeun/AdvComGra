@@ -42,7 +42,11 @@ public:
     QCheckBox *controlMeshCB;
     QDoubleSpinBox *sharpnessSlider;
     QLabel *label;
-    QPushButton *sharpnessPB;
+    QGroupBox *quadPatchGB;
+    QSpinBox *outerLevelSB;
+    QSpinBox *innerLevelSB;
+    QLabel *label_3;
+    QLabel *label_2;
     MainView *MainDisplay;
 
     void setupUi(QMainWindow *MainWindow)
@@ -81,35 +85,52 @@ public:
         SettingsGB->setCheckable(false);
         SubdivSteps = new QSpinBox(SettingsGB);
         SubdivSteps->setObjectName(QStringLiteral("SubdivSteps"));
-        SubdivSteps->setGeometry(QRect(20, 260, 181, 29));
+        SubdivSteps->setGeometry(QRect(20, 320, 181, 29));
         ImportOBJ = new QPushButton(SettingsGB);
         ImportOBJ->setObjectName(QStringLiteral("ImportOBJ"));
         ImportOBJ->setGeometry(QRect(20, 40, 181, 28));
         StepsLabel = new QLabel(SettingsGB);
         StepsLabel->setObjectName(QStringLiteral("StepsLabel"));
-        StepsLabel->setGeometry(QRect(20, 230, 181, 20));
+        StepsLabel->setGeometry(QRect(20, 290, 181, 20));
         checkBox = new QCheckBox(SettingsGB);
         checkBox->setObjectName(QStringLiteral("checkBox"));
         checkBox->setGeometry(QRect(30, 90, 87, 22));
         checkBox->setChecked(true);
         limitPointsCB = new QCheckBox(SettingsGB);
         limitPointsCB->setObjectName(QStringLiteral("limitPointsCB"));
-        limitPointsCB->setGeometry(QRect(20, 300, 87, 22));
+        limitPointsCB->setGeometry(QRect(20, 360, 87, 22));
         quadPatchCB = new QCheckBox(SettingsGB);
         quadPatchCB->setObjectName(QStringLiteral("quadPatchCB"));
-        quadPatchCB->setGeometry(QRect(30, 120, 161, 22));
+        quadPatchCB->setGeometry(QRect(30, 150, 161, 22));
         controlMeshCB = new QCheckBox(SettingsGB);
         controlMeshCB->setObjectName(QStringLiteral("controlMeshCB"));
-        controlMeshCB->setGeometry(QRect(30, 150, 131, 22));
+        controlMeshCB->setGeometry(QRect(30, 120, 131, 22));
         sharpnessSlider = new QDoubleSpinBox(SettingsGB);
         sharpnessSlider->setObjectName(QStringLiteral("sharpnessSlider"));
         sharpnessSlider->setGeometry(QRect(20, 460, 62, 27));
         label = new QLabel(SettingsGB);
         label->setObjectName(QStringLiteral("label"));
         label->setGeometry(QRect(20, 430, 111, 17));
-        sharpnessPB = new QPushButton(SettingsGB);
-        sharpnessPB->setObjectName(QStringLiteral("sharpnessPB"));
-        sharpnessPB->setGeometry(QRect(90, 460, 111, 27));
+        quadPatchGB = new QGroupBox(SettingsGB);
+        quadPatchGB->setObjectName(QStringLiteral("quadPatchGB"));
+        quadPatchGB->setEnabled(false);
+        quadPatchGB->setGeometry(QRect(20, 185, 166, 80));
+        outerLevelSB = new QSpinBox(quadPatchGB);
+        outerLevelSB->setObjectName(QStringLiteral("outerLevelSB"));
+        outerLevelSB->setGeometry(QRect(10, 50, 41, 27));
+        outerLevelSB->setValue(4);
+        innerLevelSB = new QSpinBox(quadPatchGB);
+        innerLevelSB->setObjectName(QStringLiteral("innerLevelSB"));
+        innerLevelSB->setEnabled(false);
+        innerLevelSB->setGeometry(QRect(10, 20, 41, 27));
+        innerLevelSB->setValue(4);
+        label_3 = new QLabel(quadPatchGB);
+        label_3->setObjectName(QStringLiteral("label_3"));
+        label_3->setGeometry(QRect(60, 55, 91, 17));
+        label_2 = new QLabel(quadPatchGB);
+        label_2->setObjectName(QStringLiteral("label_2"));
+        label_2->setEnabled(false);
+        label_2->setGeometry(QRect(60, 25, 101, 17));
 
         horizontalLayout->addWidget(SettingsGB);
 
@@ -136,7 +157,9 @@ public:
         quadPatchCB->setText(QApplication::translate("MainWindow", "Quad Patches", 0));
         controlMeshCB->setText(QApplication::translate("MainWindow", "Control Mesh", 0));
         label->setText(QApplication::translate("MainWindow", "Sharpness", 0));
-        sharpnessPB->setText(QApplication::translate("MainWindow", "Apply Sharpness", 0));
+        quadPatchGB->setTitle(QApplication::translate("MainWindow", "Quad Patch Setting", 0));
+        label_3->setText(QApplication::translate("MainWindow", "Innter Level", 0));
+        label_2->setText(QApplication::translate("MainWindow", "Outer Level", 0));
     } // retranslateUi
 
 };
