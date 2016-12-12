@@ -2,9 +2,12 @@
     <qresource prefix="/">
         <file>shaders/fragshader.glsl</file>
         <file>shaders/vertshader.glsl</file>
-        <file>shaders/tcshader.glsl</file>
-        <file>shaders/teshader.glsl</file>
-        <file>shaders/controlfragshader.glsl</file>
-        <file>shaders/vertshaderts.glsl</file>
+        <file>shaders/tess_ctrlshader.glsl</file>
+        <file>shaders/tess_evalshader.glsl</file>
+        <file>shaders/ctrl_fragshader.glsl</file>
+        <file>shaders/tess_vertshader.glsl</file>
+        <file>shaders/tess_fragshader.glsl</file>
+        <file>shaders/ctrl_vertshader.glsl</file>
+        <file>shaders/tess_geomshader.glsl</file>
     </qresource>
 </RCC>

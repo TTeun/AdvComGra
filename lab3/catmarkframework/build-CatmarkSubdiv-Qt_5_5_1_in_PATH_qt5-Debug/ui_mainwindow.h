@@ -47,6 +47,7 @@ public:
     QSpinBox *innerLevelSB;
     QLabel *label_3;
     QLabel *label_2;
+    QCheckBox *gridLinesCB;
     MainView *MainDisplay;
 
     void setupUi(QMainWindow *MainWindow)
@@ -85,20 +86,20 @@ public:
         SettingsGB->setCheckable(false);
         SubdivSteps = new QSpinBox(SettingsGB);
         SubdivSteps->setObjectName(QStringLiteral("SubdivSteps"));
-        SubdivSteps->setGeometry(QRect(20, 320, 181, 29));
+        SubdivSteps->setGeometry(QRect(20, 345, 181, 29));
         ImportOBJ = new QPushButton(SettingsGB);
         ImportOBJ->setObjectName(QStringLiteral("ImportOBJ"));
         ImportOBJ->setGeometry(QRect(20, 40, 181, 28));
         StepsLabel = new QLabel(SettingsGB);
         StepsLabel->setObjectName(QStringLiteral("StepsLabel"));
-        StepsLabel->setGeometry(QRect(20, 290, 181, 20));
+        StepsLabel->setGeometry(QRect(20, 315, 181, 20));
         checkBox = new QCheckBox(SettingsGB);
         checkBox->setObjectName(QStringLiteral("checkBox"));
         checkBox->setGeometry(QRect(30, 90, 87, 22));
         checkBox->setChecked(true);
         limitPointsCB = new QCheckBox(SettingsGB);
         limitPointsCB->setObjectName(QStringLiteral("limitPointsCB"));
-        limitPointsCB->setGeometry(QRect(20, 360, 87, 22));
+        limitPointsCB->setGeometry(QRect(20, 385, 87, 22));
         quadPatchCB = new QCheckBox(SettingsGB);
         quadPatchCB->setObjectName(QStringLiteral("quadPatchCB"));
         quadPatchCB->setGeometry(QRect(30, 150, 161, 22));
@@ -114,7 +115,7 @@ public:
         quadPatchGB = new QGroupBox(SettingsGB);
         quadPatchGB->setObjectName(QStringLiteral("quadPatchGB"));
         quadPatchGB->setEnabled(false);
-        quadPatchGB->setGeometry(QRect(20, 185, 166, 80));
+        quadPatchGB->setGeometry(QRect(20, 185, 166, 121));
         outerLevelSB = new QSpinBox(quadPatchGB);
         outerLevelSB->setObjectName(QStringLiteral("outerLevelSB"));
         outerLevelSB->setGeometry(QRect(10, 50, 41, 27));
@@ -131,6 +132,10 @@ public:
         label_2->setObjectName(QStringLiteral("label_2"));
         label_2->setEnabled(false);
         label_2->setGeometry(QRect(60, 25, 101, 17));
+        gridLinesCB = new QCheckBox(quadPatchGB);
+        gridLinesCB->setObjectName(QStringLiteral("gridLinesCB"));
+        gridLinesCB->setEnabled(false);
+        gridLinesCB->setGeometry(QRect(10, 85, 87, 22));
 
         horizontalLayout->addWidget(SettingsGB);
 
@@ -160,6 +165,7 @@ public:
         quadPatchGB->setTitle(QApplication::translate("MainWindow", "Quad Patch Setting", 0));
         label_3->setText(QApplication::translate("MainWindow", "Innter Level", 0));
         label_2->setText(QApplication::translate("MainWindow", "Outer Level", 0));
+        gridLinesCB->setText(QApplication::translate("MainWindow", "Grid Lines", 0));
     } // retranslateUi
 
 };

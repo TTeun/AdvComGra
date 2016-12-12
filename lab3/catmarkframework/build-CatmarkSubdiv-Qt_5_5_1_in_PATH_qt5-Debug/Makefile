@@ -333,11 +333,14 @@ compiler_rcc_clean:
 	-$(DEL_FILE) qrc_resources.cpp
 qrc_resources.cpp: ../CatmarkSubdiv/resources.qrc \
 		../CatmarkSubdiv/shaders/fragshader.glsl \
-		../CatmarkSubdiv/shaders/teshader.glsl \
-		../CatmarkSubdiv/shaders/controlfragshader.glsl \
-		../CatmarkSubdiv/shaders/vertshaderts.glsl \
+		../CatmarkSubdiv/shaders/tess_fragshader.glsl \
+		../CatmarkSubdiv/shaders/ctrl_vertshader.glsl \
 		../CatmarkSubdiv/shaders/vertshader.glsl \
-		../CatmarkSubdiv/shaders/tcshader.glsl
+		../CatmarkSubdiv/shaders/tess_vertshader.glsl \
+		../CatmarkSubdiv/shaders/tess_geomshader.glsl \
+		../CatmarkSubdiv/shaders/ctrl_fragshader.glsl \
+		../CatmarkSubdiv/shaders/tess_evalshader.glsl \
+		../CatmarkSubdiv/shaders/tess_ctrlshader.glsl
 	/usr/lib/x86_64-linux-gnu/qt5/bin/rcc -name resources ../CatmarkSubdiv/resources.qrc -o qrc_resources.cpp
 
 compiler_moc_header_make_all: moc_mainwindow.cpp moc_mainview.cpp
@@ -357,6 +360,8 @@ moc_mainview.cpp: ../CatmarkSubdiv/mesh.h \
 		../CatmarkSubdiv/face.h \
 		../CatmarkSubdiv/halfedge.h \
 		../CatmarkSubdiv/objfile.h \
+		../CatmarkSubdiv/mainwindow.h \
+		../CatmarkSubdiv/meshtools.h \
 		../CatmarkSubdiv/mainview.h
 	/usr/lib/x86_64-linux-gnu/qt5/bin/moc $(DEFINES) -I/usr/lib/x86_64-linux-gnu/qt5/mkspecs/linux-g++-64 -I/home/teun/Documents/AGC/lab3/catmarkframework/CatmarkSubdiv -I/usr/include/x86_64-linux-gnu/qt5 -I/usr/include/x86_64-linux-gnu/qt5/QtWidgets -I/usr/include/x86_64-linux-gnu/qt5/QtGui -I/usr/include/x86_64-linux-gnu/qt5/QtCore -I. -I/usr/include/c++/5 -I/usr/include/x86_64-linux-gnu/c++/5 -I/usr/include/c++/5/backward -I/usr/lib/gcc/x86_64-linux-gnu/5/include -I/usr/local/include -I/usr/lib/gcc/x86_64-linux-gnu/5/include-fixed -I/usr/include/x86_64-linux-gnu -I/usr/include ../CatmarkSubdiv/mainview.h -o moc_mainview.cpp
 
@@ -371,7 +376,9 @@ ui_mainwindow.h: ../CatmarkSubdiv/mainwindow.ui \
 		../CatmarkSubdiv/vertex.h \
 		../CatmarkSubdiv/face.h \
 		../CatmarkSubdiv/halfedge.h \
-		../CatmarkSubdiv/objfile.h
+		../CatmarkSubdiv/objfile.h \
+		../CatmarkSubdiv/mainwindow.h \
+		../CatmarkSubdiv/meshtools.h
 	/usr/lib/x86_64-linux-gnu/qt5/bin/uic ../CatmarkSubdiv/mainwindow.ui -o ui_mainwindow.h
 
 compiler_yacc_decl_make_all:
@@ -427,7 +434,9 @@ mainview.o: ../CatmarkSubdiv/mainview.cpp ../CatmarkSubdiv/mainview.h \
 		../CatmarkSubdiv/vertex.h \
 		../CatmarkSubdiv/face.h \
 		../CatmarkSubdiv/halfedge.h \
-		../CatmarkSubdiv/objfile.h
+		../CatmarkSubdiv/objfile.h \
+		../CatmarkSubdiv/mainwindow.h \
+		../CatmarkSubdiv/meshtools.h
 	$(CXX) -c $(CXXFLAGS) $(INCPATH) -o mainview.o ../CatmarkSubdiv/mainview.cpp
 
 qrc_resources.o: qrc_resources.cpp 

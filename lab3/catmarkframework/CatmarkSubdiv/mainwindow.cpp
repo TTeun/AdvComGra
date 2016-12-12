@@ -75,6 +75,7 @@ void MainWindow::on_quadPatchCB_toggled(bool checked)
     ui->outerLevelSB->setEnabled(checked);
     ui->label_2->setEnabled(checked);
     ui->label_3->setEnabled(checked);
+    ui->gridLinesCB->setEnabled(checked);
 
     ui->MainDisplay->updateMatrices();
     ui->MainDisplay->update();
@@ -123,5 +124,11 @@ void MainWindow::on_innerLevelSB_valueChanged(int arg1)
 void MainWindow::on_outerLevelSB_valueChanged(int arg1)
 {
     ui->MainDisplay->tessLevelOuter = arg1;
+    ui->MainDisplay->updateMatrices();
+}
+
+void MainWindow::on_gridLinesCB_toggled(bool checked)
+{
+    ui->MainDisplay->showGridLines = checked;
     ui->MainDisplay->updateMatrices();
 }

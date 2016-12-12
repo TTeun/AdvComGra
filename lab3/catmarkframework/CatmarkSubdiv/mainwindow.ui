@@ -66,7 +66,7 @@ QGroupBox::title {
        <property name="geometry">
         <rect>
          <x>20</x>
-         <y>320</y>
+         <y>345</y>
          <width>181</width>
          <height>29</height>
         </rect>
@@ -89,7 +89,7 @@ QGroupBox::title {
        <property name="geometry">
         <rect>
          <x>20</x>
-         <y>290</y>
+         <y>315</y>
          <width>181</width>
          <height>20</height>
         </rect>
@@ -118,7 +118,7 @@ QGroupBox::title {
        <property name="geometry">
         <rect>
          <x>20</x>
-         <y>360</y>
+         <y>385</y>
          <width>87</width>
          <height>22</height>
         </rect>
@@ -185,7 +185,7 @@ QGroupBox::title {
          <x>20</x>
          <y>185</y>
          <width>166</width>
-         <height>80</height>
+         <height>121</height>
         </rect>
        </property>
        <property name="title">
@@ -247,6 +247,22 @@ QGroupBox::title {
         </property>
         <property name="text">
          <string>Outer Level</string>
+        </property>
+       </widget>
+       <widget class="QCheckBox" name="gridLinesCB">
+        <property name="enabled">
+         <bool>false</bool>
+        </property>
+        <property name="geometry">
+         <rect>
+          <x>10</x>
+          <y>85</y>
+          <width>87</width>
+          <height>22</height>
+         </rect>
+        </property>
+        <property name="text">
+         <string>Grid Lines</string>
         </property>
        </widget>
       </widget>

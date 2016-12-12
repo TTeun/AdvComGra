@@ -44,16 +44,17 @@ void MainView::createShaderPrograms() {
   mainShaderProg->link();
 
   controlMeshShader = new QOpenGLShaderProgram();
-  controlMeshShader->addShaderFromSourceFile(QOpenGLShader::Vertex, ":/shaders/vertshader.glsl");
-  controlMeshShader->addShaderFromSourceFile(QOpenGLShader::Fragment, ":/shaders/controlfragshader.glsl");
+  controlMeshShader->addShaderFromSourceFile(QOpenGLShader::Vertex, ":/shaders/ctrl_vertshader.glsl");
+  controlMeshShader->addShaderFromSourceFile(QOpenGLShader::Fragment, ":/shaders/ctrl_fragshader.glsl");
 
   controlMeshShader->link();
 
   tessShaderProg = new QOpenGLShaderProgram();
-  tessShaderProg->addShaderFromSourceFile(QOpenGLShader::Vertex, ":/shaders/vertshaderts.glsl");          // vertex shader without projection
-  tessShaderProg->addShaderFromSourceFile(QOpenGLShader::TessellationControl, ":/shaders/tcshader.glsl");
-  tessShaderProg->addShaderFromSourceFile(QOpenGLShader::TessellationEvaluation, ":/shaders/teshader.glsl");
-  tessShaderProg->addShaderFromSourceFile(QOpenGLShader::Fragment, ":/shaders/fragshader.glsl");
+  tessShaderProg->addShaderFromSourceFile(QOpenGLShader::Vertex, ":/shaders/tess_vertshader.glsl");
+  tessShaderProg->addShaderFromSourceFile(QOpenGLShader::TessellationControl, ":/shaders/tess_ctrlshader.glsl");
+  tessShaderProg->addShaderFromSourceFile(QOpenGLShader::TessellationEvaluation, ":/shaders/tess_evalshader.glsl");
+  tessShaderProg->addShaderFromSourceFile(QOpenGLShader::Geometry, ":/shaders/tess_geomshader.glsl");
+  tessShaderProg->addShaderFromSourceFile(QOpenGLShader::Fragment, ":/shaders/tess_fragshader.glsl");
 
   tessShaderProg->link();
 
@@ -70,6 +71,7 @@ void MainView::createShaderPrograms() {
   tessUniNormalMatrix = glGetUniformLocation(tessShaderProg->programId(), "normalmatrix");
   uniTessLevelInner = glGetUniformLocation(tessShaderProg->programId(), "TessLevelInner");
   uniTessLevelOuter = glGetUniformLocation(tessShaderProg->programId(), "TessLevelOuter");
+  uniShowGridLines = glGetUniformLocation(tessShaderProg->programId(), "showGridLines");
 
 }
 
@@ -301,6 +303,7 @@ void MainView::updateUniforms() {
         tessShaderProg->bind();
         glUniform1f(uniTessLevelInner, tessLevelInner);
         glUniform1f(uniTessLevelOuter, tessLevelOuter);
+        glUniform1f(uniShowGridLines, showGridLines);
         glUniformMatrix4fv(tessUniModelViewMatrix, 1, false, modelViewMatrix.data());
         glUniformMatrix4fv(tessUniProjectionMatrix, 1, false, projectionMatrix.data());
         glUniformMatrix3fv(tessUniNormalMatrix, 1, false, normalMatrix.data());
@@ -482,8 +485,6 @@ void MainView::mousePressEvent(QMouseEvent* event) {
       }
 
       selected_index = minIndex;
-
-      qDebug() << Meshes[0].HalfEdges[selected_index].target->val;
 
       mainWindow->setSharpness(Meshes[0].HalfEdges[selected_index].sharpness);
       updateMatrices();

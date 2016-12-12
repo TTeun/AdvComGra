@@ -50,6 +50,7 @@ public:
 
   float tessLevelInner = 4.0;
   float tessLevelOuter = 4.0;
+  bool showGridLines = false;
 
 protected:
   void initializeGL();
@@ -78,6 +79,7 @@ private:
   GLint tessUniModelViewMatrix, tessUniProjectionMatrix, tessUniNormalMatrix;
   GLint uniTessLevelInner;
   GLint uniTessLevelOuter;
+  GLint uniShowGridLines;
 
 
 

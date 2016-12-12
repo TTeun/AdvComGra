@@ -44,6 +44,8 @@ private slots:
 
   void on_outerLevelSB_valueChanged(int arg1);
 
+  void on_gridLinesCB_toggled(bool checked);
+
 private:
 };
 
