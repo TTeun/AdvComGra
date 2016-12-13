@@ -16,7 +16,7 @@ void main() {
 
   vec3 matcolour;
   if (d2 == 0 && showGridLines)
-    matcolour = vec3(1.0, 1.0, 1.0);
+    matcolour = vec3(0.0, 1.0, 0.0);
   else
     matcolour = vec3(0.53, 0.80, 0.87);
 

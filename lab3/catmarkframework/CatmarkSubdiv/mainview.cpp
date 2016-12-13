@@ -223,11 +223,12 @@ void MainView::updateMeshBuffers(Mesh *currentMesh) {
                   currentEdge = currentEdge->next;
               }
               if (isRegular){
+                  for (int i = 0; i < 3; i++){
                   polyIndices.append(currentEdge->target->index);
                   polyIndices.append(currentEdge->prev->target->index);
                   polyIndices.append(currentEdge->next->target->index);
                   polyIndices.append(currentEdge->next->next->target->index);
-
+                  }
                   polyIndices.append(maxInt);
               }
           }
@@ -380,7 +381,7 @@ void MainView::paintGL() {
         glBindVertexArray(meshVAO);
         tessShaderProg->bind();
         glPolygonMode( GL_FRONT_AND_BACK, GL_LINE );
-        glPatchParameteri(GL_PATCH_VERTICES, 4);
+        glPatchParameteri(GL_PATCH_VERTICES, 12);
         glDrawElements(GL_PATCHES, meshIBOSize, GL_UNSIGNED_INT, 0);
         tessShaderProg->release();
     }

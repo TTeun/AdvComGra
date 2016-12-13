@@ -1,6 +1,6 @@
 #version 410
 
-layout(vertices = 16) out;
+layout (vertices = 16) out;
 
 layout (location = 0) in vec3 vertcoords_camera_vs[];
 
@@ -24,4 +24,3 @@ void main()
         gl_TessLevelOuter[3] = TessLevelOuter;
     }
 }
-

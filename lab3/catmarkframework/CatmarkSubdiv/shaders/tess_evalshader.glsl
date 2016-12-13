@@ -14,8 +14,8 @@ void main()
 {
     float u = gl_TessCoord.x, v = gl_TessCoord.y; // Coordinates in the unit (u,v) plane
 
-    vec3 a = mix(vertcoords_camera_tcs[0], vertcoords_camera_tcs[1], u);
-    vec3 b = mix(vertcoords_camera_tcs[2], vertcoords_camera_tcs[3], u);
+    vec3 a = mix(vertcoords_camera_tcs[4], vertcoords_camera_tcs[5], u);
+    vec3 b = mix(vertcoords_camera_tcs[6], vertcoords_camera_tcs[7], u);
     vertcoords_camera_fs = mix(a, b, v);
 
     tePatchDistance = vec4(u, v, 1-u, 1-v);
