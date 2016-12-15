@@ -21,6 +21,8 @@ void MainWindow::importOBJ() {
   ui->MainDisplay->Meshes.squeeze();
   ui->MainDisplay->Meshes.append( Mesh(&newModel) );
 
+  ui->ImportOBJ->setEnabled(false);
+
   ui->MainDisplay->updateMeshBuffers( &ui->MainDisplay->Meshes[0] );
   ui->MainDisplay->modelLoaded = true;
 
@@ -47,6 +49,7 @@ void MainWindow::on_SubdivSteps_valueChanged(int value) {
   ui->MainDisplay->currentMeshIndex = value;
 
   ui->MainDisplay->updateMeshBuffers( &ui->MainDisplay->Meshes[value] );
+  ui->MainDisplay->buildQuadMesh();
   ui->limitPointsCB->setChecked(false);
 }
 

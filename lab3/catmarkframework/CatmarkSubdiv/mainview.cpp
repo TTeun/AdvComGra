@@ -28,6 +28,10 @@ MainView::~MainView() {
   glDeleteBuffers(1, &slctIndexBO);
   glDeleteVertexArrays(1, &slctVAO);
 
+  glDeleteBuffers(1, &quadCoordsBO);
+  glDeleteBuffers(1, &quadIndexBO);
+  glDeleteVertexArrays(1, &quadVAO);
+
   debugLogger->stopLogging();
 
   delete mainShaderProg;
@@ -214,18 +218,19 @@ void MainView::buildQuadMesh(){
         if (n == 4) // We are looking at a quad
         {
             isRegular = true;
-            currentEdge = currentMesh->Faces[k].side;
+            startEdge = currentMesh->Faces[k].side;
             for (int j = 0; j < 4; ++j) // Check the valencies of the vertices of the face
             {
-                if (currentEdge->target->val != 4 && currentEdge->twin->polygon)
+                if (startEdge->target->val != 4 && startEdge->twin->polygon)
                     isRegular = false;
 
-                currentEdge = currentEdge->next;
+                startEdge = startEdge->next;
             }
 
             if (isRegular)
             {
-                startEdge = currentEdge->twin->next->twin->prev;
+                // Select the one ring neighborhood of the regular face
+                startEdge = currentMesh->Faces[k].side->twin->next->twin->prev;
                 for (int p = 0; p < 4; ++p)
                 {
                     currentEdge = startEdge;
@@ -233,7 +238,7 @@ void MainView::buildQuadMesh(){
                     quadIndices.append(index);
                     index++;
 
-                    for (int i = 0; i < 3; ++i)
+                    for (int h = 0; h < 3; ++h)
                     {
                         quadCoords.append(currentEdge->target->coords);
                         currentEdge = currentEdge->next->twin->next;
@@ -242,6 +247,22 @@ void MainView::buildQuadMesh(){
                     }
                     startEdge = startEdge->next->next->twin;
                 }
+//                for (int p = 0; p < 4; ++p)
+//                {
+//                    currentEdge = startEdge;
+//                    quadCoords.append(currentEdge->twin->target->coords);
+//                    quadIndices.append(index);
+//                    index++;
+
+//                    for (int i = 0; i < 3; ++i)
+//                    {
+//                        quadCoords.append(currentEdge->target->coords);
+//                        currentEdge = currentEdge->next->twin->next;
+//                        quadIndices.append(index);
+//                        index++;
+//                    }
+//                    startEdge = startEdge->next->next->twin;
+//                }
             }
         }
     }
@@ -432,6 +453,7 @@ void MainView::paintGL() {
     if (showQuadPatch)
     {
         glBindVertexArray(quadVAO);
+//        mainShaderProg->bind();
         tessShaderProg->bind();
         glPatchParameteri(GL_PATCH_VERTICES, 16);
         if (wireframeMode)
@@ -439,7 +461,9 @@ void MainView::paintGL() {
         else
             glPolygonMode( GL_FRONT_AND_BACK, GL_FILL );
 
+        glPointSize(5.0);
         glDrawElements(GL_PATCHES, quadCoords.size(), GL_UNSIGNED_INT, 0);
+//        mainShaderProg->release();
         tessShaderProg->release();
     }
     else if (showModel)
