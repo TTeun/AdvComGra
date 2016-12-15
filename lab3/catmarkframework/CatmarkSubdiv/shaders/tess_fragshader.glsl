@@ -9,6 +9,7 @@ layout (location = 3) in vec4 gPatchDistance;
 out vec4 fColor;
 
 void main() {
+  // Same as main fragment shader but now we get patchDistance from the geom shader to determine if we are on the side of a quad or inside (for showGridLines)
 
   vec3 lightpos = vec3(3.0, 0.0, 2.0);
   vec3 lightcolour = vec3(1.0);

@@ -10,5 +10,5 @@ uniform mat3 normalmatrix;
 layout (location = 0) out vec3 vertcoords_camera_vs;
 
 void main() {
-  vertcoords_camera_vs = vec3(modelviewmatrix * vec4(vertcoords_world_vs, 1.0));
+  vertcoords_camera_vs = vec3(modelviewmatrix * vec4(vertcoords_world_vs, 1.0)); // No projection just yet
 }

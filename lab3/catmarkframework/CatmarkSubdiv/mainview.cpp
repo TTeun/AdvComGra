@@ -44,18 +44,21 @@ MainView::~MainView() {
 void MainView::createShaderPrograms() {
   qDebug() << ".. createShaderPrograms";
 
+  // Main shader program
   mainShaderProg = new QOpenGLShaderProgram();
   mainShaderProg->addShaderFromSourceFile(QOpenGLShader::Vertex, ":/shaders/vertshader.glsl");
   mainShaderProg->addShaderFromSourceFile(QOpenGLShader::Fragment, ":/shaders/fragshader.glsl");
 
   mainShaderProg->link();
 
+  // Shader for control mesh
   controlMeshShader = new QOpenGLShaderProgram();
   controlMeshShader->addShaderFromSourceFile(QOpenGLShader::Vertex, ":/shaders/ctrl_vertshader.glsl");
   controlMeshShader->addShaderFromSourceFile(QOpenGLShader::Fragment, ":/shaders/ctrl_fragshader.glsl");
 
   controlMeshShader->link();
 
+  // Shader for tessellating regular quads
   tessShaderProg = new QOpenGLShaderProgram();
   tessShaderProg->addShaderFromSourceFile(QOpenGLShader::Vertex, ":/shaders/tess_vertshader.glsl");
   tessShaderProg->addShaderFromSourceFile(QOpenGLShader::TessellationControl, ":/shaders/tess_ctrlshader.glsl");
@@ -65,6 +68,7 @@ void MainView::createShaderPrograms() {
 
   tessShaderProg->link();
 
+  // Collect uniforms
   uniModelViewMatrix = glGetUniformLocation(mainShaderProg->programId(), "modelviewmatrix");
   uniProjectionMatrix = glGetUniformLocation(mainShaderProg->programId(), "projectionmatrix");
   uniNormalMatrix = glGetUniformLocation(mainShaderProg->programId(), "normalmatrix");
@@ -159,8 +163,11 @@ void MainView::createBuffers() {
   glBindVertexArray(0);
 }
 
-void MainView::buildCtrlMesh(){
+void MainView::buildCtrlMesh()
+{
+    // Here we build the control mesh which can be viewed over the subdivided mesh of the quad mesh
     firstPass = false;
+
     unsigned int k, n, m;
     HalfEdge* currentEdge;
     ctrlCoords.clear();
@@ -169,11 +176,11 @@ void MainView::buildCtrlMesh(){
     ctrlIndices.clear();
     ctrlIndices.reserve(Meshes[0].HalfEdges.size() + Meshes[0].Faces.size());
 
-    for (k=0; k<(GLuint)Meshes[0].Vertices.size(); k++) {
+    for (k=0; k<(GLuint)Meshes[0].Vertices.size(); k++) { // Copy all vertices and make then yellow
       ctrlCoords.append(Meshes[0].Vertices[k].coords);
       ctrlColours.append(QVector3D(0.6, 0.8, 0.0));
     }
-    for (k=0; k<(GLuint)Meshes[0].Faces.size(); k++) {
+    for (k=0; k<(GLuint)Meshes[0].Faces.size(); k++) { // Copy the edges (display mode will be GL_LINES)
         n = Meshes[0].Faces[k].val;
         currentEdge = Meshes[0].Faces[k].side;
         for (m=0; m<n; m++) {
@@ -199,7 +206,9 @@ void MainView::buildCtrlMesh(){
 
 }
 
-void MainView::buildQuadMesh(){
+void MainView::buildQuadMesh()
+{
+    // Here we find and index the regular quads from the currently displayed mesh
     HalfEdge* currentEdge, *startEdge;
     quadCoords.clear();
     quadCoords.squeeze();
@@ -210,7 +219,7 @@ void MainView::buildQuadMesh(){
     unsigned int k, n;
     bool isRegular;
 
-    Mesh *currentMesh = &Meshes[currentMeshIndex];
+    Mesh *currentMesh = limitShown ? limitMesh : &Meshes[currentMeshIndex]; // Load either (subdivided) mesh or limit mesh
     unsigned int index = 0;
 
     for (k=0; k<(GLuint)currentMesh->Faces.size(); k++) {
@@ -221,8 +230,10 @@ void MainView::buildQuadMesh(){
             startEdge = currentMesh->Faces[k].side;
             for (int j = 0; j < 4; ++j) // Check the valencies of the vertices of the face
             {
-                if (startEdge->target->val != 4 && startEdge->twin->polygon)
+                if (startEdge->target->val != 4){
                     isRegular = false;
+                    break;
+                }
 
                 startEdge = startEdge->next;
             }
@@ -230,6 +241,17 @@ void MainView::buildQuadMesh(){
             if (isRegular)
             {
                 // Select the one ring neighborhood of the regular face
+
+                /* Slightly ackward loop. Index 16 points as
+
+                0  1  2  3
+                4  5  6  7
+                8  9  10 11
+                12 13 14 15
+
+                where the quad of interest is bound by 5, 6, 9 and 10
+
+                */
                 startEdge = currentMesh->Faces[k].side->twin->next->twin->prev;
                 for (int p = 0; p < 4; ++p)
                 {
@@ -247,22 +269,6 @@ void MainView::buildQuadMesh(){
                     }
                     startEdge = startEdge->next->next->twin;
                 }
-//                for (int p = 0; p < 4; ++p)
-//                {
-//                    currentEdge = startEdge;
-//                    quadCoords.append(currentEdge->twin->target->coords);
-//                    quadIndices.append(index);
-//                    index++;
-
-//                    for (int i = 0; i < 3; ++i)
-//                    {
-//                        quadCoords.append(currentEdge->target->coords);
-//                        currentEdge = currentEdge->next->twin->next;
-//                        quadIndices.append(index);
-//                        index++;
-//                    }
-//                    startEdge = startEdge->next->next->twin;
-//                }
             }
         }
     }
@@ -285,7 +291,7 @@ void MainView::updateMeshBuffers(Mesh *currentMesh) {
   unsigned short n, m;
   HalfEdge* currentEdge;
 
-  if (firstPass)
+  if (firstPass)       // First time we go through this function, build the control mesh.
       buildCtrlMesh();
 
 
@@ -393,7 +399,6 @@ void MainView::updateUniforms() {
         controlMeshShader->release();
     }
 }
-// ---
 
 void MainView::initializeGL() {
 
@@ -422,12 +427,11 @@ void MainView::initializeGL() {
   maxInt = ((unsigned int) -1);
   glPrimitiveRestartIndex(maxInt);
 
-  // ---
 
   createShaderPrograms();
   createBuffers();
 
-  // ---
+  glPatchParameteri(GL_PATCH_VERTICES, 16);
 
   updateMatrices();
 }
@@ -450,23 +454,21 @@ void MainView::paintGL() {
 
     updateUniforms();
 
-    if (showQuadPatch)
-    {
-        glBindVertexArray(quadVAO);
-//        mainShaderProg->bind();
-        tessShaderProg->bind();
-        glPatchParameteri(GL_PATCH_VERTICES, 16);
-        if (wireframeMode)
-            glPolygonMode( GL_FRONT_AND_BACK, GL_LINE );
-        else
-            glPolygonMode( GL_FRONT_AND_BACK, GL_FILL );
+    if (wireframeMode)
+        glPolygonMode( GL_FRONT_AND_BACK, GL_LINE );
+    else
+        glPolygonMode( GL_FRONT_AND_BACK, GL_FILL );
 
-        glPointSize(5.0);
-        glDrawElements(GL_PATCHES, quadCoords.size(), GL_UNSIGNED_INT, 0);
-//        mainShaderProg->release();
-        tessShaderProg->release();
-    }
-    else if (showModel)
+    if (showModel)
+    {
+        if (showQuadPatch)
+        {
+            glBindVertexArray(quadVAO);
+            tessShaderProg->bind();
+            glDrawElements(GL_PATCHES, quadCoords.size(), GL_UNSIGNED_INT, 0);
+            tessShaderProg->release();
+        }
+        else
         {
             glBindVertexArray(meshVAO);
             mainShaderProg->bind();
@@ -479,6 +481,7 @@ void MainView::paintGL() {
             }
             mainShaderProg->release();
         }
+    }
 
     if (showControlMesh)
     {
@@ -520,37 +523,38 @@ void MainView::mousePressEvent(QMouseEvent* event) {
       ray_eye[3] = 0.0; //  The ray is a direction, not a position
       QMatrix4x4 MV = modelViewMatrix.inverted();
       QVector4D ray_f = MV * ray_eye;
-      QVector3D ray_final = (QVector3D(ray_f[0], ray_f[1], ray_f[2])).normalized();
       QVector4D lastCol = MV.column(3);
-      QVector3D origin = QVector3D(lastCol[0], lastCol[1], lastCol[2]);
 
-      // ray = origin + t * ray_final, with -infty < t < infty
-      // HalfEdge = p0 + s * (p1 - p0), with 0 <= s <= 1
 
       float dist, minDist = 1000.0;
       int minIndex = 0;
 
-      QVector3D n, n2, p1, p2, d1, d2;
+      // Find the algorithm for instance on Wikipedia on skew lines
+      QVector3D n, n2, p1, d1;
+      QVector3D d2 = (QVector3D(ray_f[0], ray_f[1], ray_f[2])).normalized(); // Naming conventions from Wiki on skew lines intersection
+      QVector3D p2 = QVector3D(lastCol[0], lastCol[1], lastCol[2]);          //              ''                 ''
+
+      // ray = p2 + t * d2, with -infty < t < infty
+      // HalfEdge = p0 + s * (p1 - p0), with 0 <= s <= 1
+
       float s;
       HalfEdge *currentEdge;
-      d2 = ray_final;
-      p2 = origin;
       for (int i = 0; i < Meshes[0].HalfEdges.size(); ++i)
       {
           currentEdge = &Meshes[0].HalfEdges[i];
           d1 =  currentEdge->twin->target->coords - currentEdge->target->coords;
 
-          n = QVector3D::crossProduct(ray_final, d1);
+          n = QVector3D::crossProduct(d2, d1);
           n = n.normalized();
 
           n2 = QVector3D::crossProduct(n, d2);
           p1 = currentEdge->target->coords;
 
           s = QVector3D::dotProduct((p2 - p1), n2) / QVector3D::dotProduct(d1, n2);
-          if ((s < 0) || (s > 1))
+          if ((s < 0) || (s > 1)) // Here, we click beyond the end of the line, so we do not select it
               dist = 1000.0;
           else {
-              dist = QVector3D::dotProduct(n, (origin - p1));
+              dist = QVector3D::dotProduct(n, (p2 - p1));
               dist = dist < 0 ? (-dist) : dist;
           }
 
@@ -562,12 +566,13 @@ void MainView::mousePressEvent(QMouseEvent* event) {
 
       selected_index = minIndex;
 
-      mainWindow->setSharpness(Meshes[0].HalfEdges[selected_index].sharpness);
+      mainWindow->setSharpness(Meshes[0].HalfEdges[selected_index].sharpness); // Upload this sharpness to the GUI
       updateMatrices();
 
       slctCoords.clear();
       slctCoords.squeeze();
 
+      // Update coordinates of the selected edge points
       slctCoords.append(Meshes[0].HalfEdges[selected_index].target->coords);
       slctCoords.append(Meshes[0].HalfEdges[selected_index].twin->target->coords);
 

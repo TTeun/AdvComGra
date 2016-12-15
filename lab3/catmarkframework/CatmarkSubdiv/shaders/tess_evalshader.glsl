@@ -10,7 +10,7 @@ layout (location = 3) out vec4 tePatchDistance;
 uniform mat4 modelviewmatrix;
 uniform mat4 projectionmatrix;
 
-float oneDCubic(float p0, float p1, float p2, float p3, float t)
+float oneDCubic(float p0, float p1, float p2, float p3, float t) // Cubic interpolation of a curve
 {
     float a = 0.5 * (-p0  + 3.0 * (p1 - p2) + p3);
     float b = p0 - 2.5 * p1 + 2.0 * p2 - 0.5 * p3;
@@ -19,7 +19,7 @@ float oneDCubic(float p0, float p1, float p2, float p3, float t)
     return a*t*t*t + b*t*t + c*t + p1; // The cubic polynomial
 }
 
-float twoDCubic(mat4 p, float u, float v)
+float twoDCubic(mat4 p, float u, float v) // Cubic interpolation on a surface
 {
     vec4 tmp;
     // Cubic interpolation along u position
@@ -58,6 +58,7 @@ void main()
         vertcoords_camera_tcs[12].z, vertcoords_camera_tcs[13].z, vertcoords_camera_tcs[14].z,vertcoords_camera_tcs[15].z
         );
 
+    // Cubic Hermite interpolation, Ensure C1 continuity for all quads surrounded by quads.
     float x = twoDCubic(Px, u, v);
     float y = twoDCubic(Py, u, v);
     float z = twoDCubic(Pz, u, v);

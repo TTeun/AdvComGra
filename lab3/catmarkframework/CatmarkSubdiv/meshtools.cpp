@@ -166,6 +166,9 @@ void subdivideCatmullClark(Mesh* inputMesh, Mesh* subdivMesh) {
 // ---
 
 QVector3D vertexPoint(HalfEdge* firstEdge, Mesh* subdivMesh) {
+    // This functions handels vertices with (possibly fractional) sharpness, it is still a mess.
+    // I did not yet spend time making it clearer because it isn't even part of lab3, but I did
+    // it for fun :)
   unsigned short k, n;
   QVector3D sumStarPts, sumFacePts;
   QVector3D vertexPt = QVector3D(0.0, 0.0, 0.0);
@@ -251,6 +254,7 @@ QVector3D avEdgePoint(HalfEdge *currentEdge){
 }
 
 QVector3D edgePoint(HalfEdge* firstEdge, Mesh* subdivMesh) {
+    // This is for (possibly fractional) sharpness edges, this is nicely cleaned up and factorized
   HalfEdge* currentEdge;
   currentEdge = firstEdge;
 
@@ -266,7 +270,8 @@ QVector3D edgePoint(HalfEdge* firstEdge, Mesh* subdivMesh) {
   return ccEdgePoint(currentEdge, subdivMesh);
 }
 
-QVector3D facePoint(HalfEdge* firstEdge) {
+QVector3D facePoint(HalfEdge* firstEdge)
+{
   unsigned short k, n;
   QVector<float> stencil;
   QVector3D facePt;
@@ -434,7 +439,7 @@ void toLimitMesh(Mesh* inputMesh, Mesh* limitMesh){
         limitMesh->Vertices.append(limitVertex);
     }
 
-    // The next section simply copies the topological connectivity from inputMesh
+    // The next section simply deep copies the topological connectivity from inputMesh
     for (i = 0; i < numHalfEdges; ++i)
         limitMesh->HalfEdges.append(inputMesh->HalfEdges[i]);
 

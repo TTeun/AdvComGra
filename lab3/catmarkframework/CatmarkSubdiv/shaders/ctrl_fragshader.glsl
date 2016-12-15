@@ -8,8 +8,7 @@ layout (location = 2) flat in vec3 in_colour;
 out vec4 fColor;
 
 void main() {
-
-
+  // Flat shader, for control net and selected line
   fColor = vec4(in_colour, 0.6);
 
 }

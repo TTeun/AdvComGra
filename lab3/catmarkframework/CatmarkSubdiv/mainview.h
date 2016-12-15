@@ -21,37 +21,37 @@ public:
   MainWindow *mainWindow;
   float rotX = 0, rotY = 0;
 
-  size_t currentMeshIndex = 0;
+  size_t currentMeshIndex = 0; // Keep track of the level of subdivision
   bool modelLoaded;
   bool wireframeMode;
-  bool showQuadPatch = false;
-  bool showControlMesh = false;
+  bool showQuadPatch = false;   // Show quads using tessellation shader
+  bool showControlMesh = false; // Show the control mesh
 
   float FoV;
   float dispRatio;
 
-  bool firstPass = true;
-
-
-  enum MODE{
-      LIMITMESH,
-      DIVMESH
-  };
+  bool firstPass = true;    // When the model is just loaded, we build the control mesh (only once)
+  bool limitShown = false;  // Project to limit points or not
 
   void updateMatrices();
   void updateUniforms();
   void updateMeshBuffers(Mesh *currentMesh);
+  void buildQuadMesh(); // Builds the mesh of regular quads for the tessellation shader
 
-  QVector<Mesh> Meshes;
-  Mesh *limitMesh;
-  void *setSharpnessSlider(double sharpness);
-  int selected_index = -1;
+  QVector<Mesh> Meshes;     // Moved here from the MainWindow class for slightly easier jumpin between meshes
+  Mesh *limitMesh;          // Pointer to limit mesh
 
+  // Tessellation level
   float tessLevelInner = 4.0;
   float tessLevelOuter = 4.0;
   bool showGridLines = false;
-  bool showModel = true;
-  void buildQuadMesh();
+
+  bool showModel = true; // To hide model, can be useful when setting sharpness on the control mesh
+
+  // This if setting the sharpness
+  void *setSharpnessSlider(double sharpness);
+  int selected_index = -1;
+
 
 protected:
   void initializeGL();
@@ -103,15 +103,16 @@ private:
   QVector<QVector3D> ctrlColours;
   QVector<unsigned int> ctrlIndices;
 
+  // These are for line selection. Always one line, so the colour vector is a constant vector of size 2, as is the indices vector
   QVector<QVector3D> slctCoords;
   QVector<QVector3D> slctColours = {QVector3D(1.0, 0.0, 0.0), QVector3D(1.0, 0.0, 0.0)};
   QVector<unsigned int> slctlIndices = {0, 1};
 
   void createShaderPrograms();
   void createBuffers();  
-  void buildCtrlMesh();
+  void buildCtrlMesh();  // Build the control mesh. Happens only once on firstPass, so can private
 
-  QVector2D lastPos;
+  QVector2D lastPos;     // Keeping track of position for mouse rotation
   bool rotating = false;
 
 private slots:

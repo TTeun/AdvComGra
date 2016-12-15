@@ -1,5 +1,5 @@
 #version 410
-
+// Tessellation control shader. Only sets the tessellation levels
 layout (vertices = 16) out;
 
 layout (location = 0) in vec3 vertcoords_camera_vs[];

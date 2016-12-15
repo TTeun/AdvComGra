@@ -26,9 +26,6 @@ void MainWindow::importOBJ() {
   ui->MainDisplay->updateMeshBuffers( &ui->MainDisplay->Meshes[0] );
   ui->MainDisplay->modelLoaded = true;
 
-  ui->MainDisplay->Meshes.append(Mesh());
-  subdivideCatmullClark(&ui->MainDisplay->Meshes[0], &ui->MainDisplay->Meshes[1]);
-  ui->MainDisplay->buildQuadMesh();
   ui->MainDisplay->update();
 }
 
@@ -61,19 +58,27 @@ void MainWindow::on_wireFrameCB_toggled(bool checked)
 
 void MainWindow::on_limitPointsCB_toggled(bool checked)
 {
+    ui->MainDisplay->limitShown = checked;
+
     if (checked){
         ui->MainDisplay->limitMesh = new Mesh();
-        toLimitMesh(&ui->MainDisplay->Meshes[currentMesh], ui->MainDisplay->limitMesh);
+        toLimitMesh(&ui->MainDisplay->Meshes[currentMesh], ui->MainDisplay->limitMesh); // Implementation in meshtools.cpp
         ui->MainDisplay->updateMeshBuffers( ui->MainDisplay->limitMesh );
+        ui->MainDisplay->buildQuadMesh(); // Quad mesh needs to be rebuild in case we want to swap between subdiv or limit mesh
+
     } else {
         ui->MainDisplay->updateMeshBuffers( &ui->MainDisplay->Meshes[currentMesh] );
+        ui->MainDisplay->buildQuadMesh();
     }
+
 }
 
 void MainWindow::on_quadPatchCB_toggled(bool checked)
 {
     ui->MainDisplay->showQuadPatch = checked;
     ui->MainDisplay->updateMeshBuffers( &ui->MainDisplay->Meshes[currentMesh] );
+
+    ui->MainDisplay->buildQuadMesh();
 
     // Show the quad ui features
     ui->quadPatchGB->setEnabled(checked);
@@ -82,8 +87,6 @@ void MainWindow::on_quadPatchCB_toggled(bool checked)
     ui->innerLevelLabel->setEnabled(checked);
     ui->outerLevelLabel->setEnabled(checked);
     ui->gridLinesCB->setEnabled(checked);
-
-    ui->showModelCB->setEnabled(not checked);
 
     ui->MainDisplay->updateMatrices();
     ui->MainDisplay->update();
@@ -107,21 +110,6 @@ void MainWindow::on_showModelCB_toggled(bool checked)
     ui->MainDisplay->update();
 }
 
-void MainWindow::setSharpness(double value){
-    ui->sharpnessSlider->setValue(value);
-
-}
-
-void MainWindow::on_sharpnessSlider_editingFinished()
-{
-    HalfEdge *currentEdge;
-    currentEdge = &ui->MainDisplay->Meshes[0].HalfEdges[ui->MainDisplay->selected_index];
-    currentEdge->sharpness = ui->sharpnessSlider->value();
-    currentEdge->twin->sharpness = ui->sharpnessSlider->value();
-
-}
-
-
 void MainWindow::on_innerLevelSB_valueChanged(int arg1)
 {
     ui->MainDisplay->tessLevelInner = arg1;
@@ -134,7 +122,7 @@ void MainWindow::on_outerLevelSB_valueChanged(int arg1)
     ui->MainDisplay->updateMatrices();
 }
 
-
+// The sharpness handling functions
 void MainWindow::on_applySharpnessPB_released()
 {
     ui->MainDisplay->Meshes.resize(1);
@@ -153,4 +141,18 @@ void MainWindow::on_applySharpnessPB_released()
     ui->MainDisplay->updateMeshBuffers( &ui->MainDisplay->Meshes[value] );
     ui->limitPointsCB->setChecked(false);
 }
+
+void MainWindow::setSharpness(double value){
+    ui->sharpnessSlider->setValue(value);
+}
+
+void MainWindow::on_sharpnessSlider_editingFinished()
+{
+    HalfEdge *currentEdge;
+    currentEdge = &ui->MainDisplay->Meshes[0].HalfEdges[ui->MainDisplay->selected_index];
+    currentEdge->sharpness = ui->sharpnessSlider->value();
+    currentEdge->twin->sharpness = ui->sharpnessSlider->value();
+
+}
+
 
