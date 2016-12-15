@@ -4,7 +4,6 @@
 #include <QOpenGLWidget>
 #include <QOpenGLFunctions_4_1_Core>
 #include <QOpenGLDebugLogger>
-
 #include <QOpenGLShaderProgram>
 
 #include <QMouseEvent>
@@ -22,7 +21,7 @@ public:
   MainWindow *mainWindow;
   float rotX = 0, rotY = 0;
 
-  size_t currentMesh = 0;
+  size_t currentMeshIndex = 0;
   bool modelLoaded;
   bool wireframeMode;
   bool showQuadPatch = false;
@@ -52,6 +51,7 @@ public:
   float tessLevelOuter = 4.0;
   bool showGridLines = false;
   bool showModel = true;
+  void buildQuadMesh();
 
 protected:
   void initializeGL();
@@ -80,13 +80,12 @@ private:
   GLint uniTessLevelOuter;
   GLint uniShowGridLines;
 
-
-
   // ---
 
   QOpenGLShaderProgram* mainShaderProg, *tessShaderProg, *controlMeshShader;
 
   GLuint meshVAO, meshCoordsBO, meshNormalsBO, meshIndexBO;
+  GLuint quadVAO, quadCoordsBO, quadIndexBO;
   GLuint ctrlVAO, ctrlCoordsBO, ctrlIndexBO, ctrlColourBO;
   GLuint slctVAO, slctCoordsBO, slctIndexBO, slctColourBO;
   unsigned int meshIBOSize;
@@ -96,6 +95,9 @@ private:
   QVector<QVector3D> vertexCoords;
   QVector<QVector3D> vertexNormals;
   QVector<unsigned int> polyIndices;
+
+  QVector<QVector3D> quadCoords;
+  QVector<unsigned int> quadIndices;
 
   QVector<QVector3D> ctrlCoords;
   QVector<QVector3D> ctrlColours;
@@ -111,6 +113,7 @@ private:
 
   QVector2D lastPos;
   bool rotating = false;
+
 private slots:
   void onMessageLogged( QOpenGLDebugMessage Message );
 

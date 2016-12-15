@@ -456,4 +456,3 @@ void toLimitMesh(Mesh* inputMesh, Mesh* limitMesh){
     qDebug() << "Limit points constructed";
 }
 
-

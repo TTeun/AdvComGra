@@ -15,4 +15,11 @@ HalfEdge* vertOnBoundary(Vertex* currentVertex);
 
 void splitHalfEdges(Mesh* inputMesh, Mesh* subdivMesh, unsigned int numHalfEdges, unsigned int numVertPts, unsigned int numFacePts);
 
+struct VertexInfo {
+    HalfEdge *bdryEdge;
+    QVector<HalfEdge*> incidentCreases;
+    float sharpness = 0.0;
+    unsigned int creaseCount = 0;
+};
+
 #endif // MESHTOOLS_H

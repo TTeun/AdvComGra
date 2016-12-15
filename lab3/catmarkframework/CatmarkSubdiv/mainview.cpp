@@ -1,8 +1,11 @@
 #include "mainview.h"
 
-MainView::MainView(QWidget *Parent) : QOpenGLWidget(Parent) {
+MainView::MainView(QWidget *Parent)
+    : QOpenGLWidget(Parent)
+{
   qDebug() << "✓✓ MainView constructor";
 
+//  shaderHandler.initShaders();
   modelLoaded = false;
   wireframeMode = true;
 
@@ -97,6 +100,21 @@ void MainView::createBuffers() {
 
   glBindVertexArray(0);
 
+  // Quad Mesh
+
+  glGenVertexArrays(1, &quadVAO);
+  glBindVertexArray(quadVAO);
+
+  glGenBuffers(1, &quadCoordsBO);
+  glBindBuffer(GL_ARRAY_BUFFER, quadCoordsBO);
+  glEnableVertexAttribArray(0);
+  glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 0, 0);
+
+  glGenBuffers(1, &quadIndexBO);
+  glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, quadIndexBO);
+
+  glBindVertexArray(0);
+
   // Control Mesh
 
   glGenVertexArrays(1, &ctrlVAO);
@@ -177,6 +195,67 @@ void MainView::buildCtrlMesh(){
 
 }
 
+void MainView::buildQuadMesh(){
+    HalfEdge* currentEdge, *startEdge;
+    quadCoords.clear();
+    quadCoords.squeeze();
+
+    quadIndices.clear();
+    quadIndices.squeeze();
+
+    unsigned int k, n;
+    bool isRegular;
+
+    Mesh *currentMesh = &Meshes[currentMeshIndex];
+    unsigned int index = 0;
+
+    for (k=0; k<(GLuint)currentMesh->Faces.size(); k++) {
+        n = currentMesh->Faces[k].val;
+        if (n == 4) // We are looking at a quad
+        {
+            isRegular = true;
+            currentEdge = currentMesh->Faces[k].side;
+            for (int j = 0; j < 4; ++j) // Check the valencies of the vertices of the face
+            {
+                if (currentEdge->target->val != 4 && currentEdge->twin->polygon)
+                    isRegular = false;
+
+                currentEdge = currentEdge->next;
+            }
+
+            if (isRegular)
+            {
+                startEdge = currentEdge->twin->next->twin->prev;
+                for (int p = 0; p < 4; ++p)
+                {
+                    currentEdge = startEdge;
+                    quadCoords.append(currentEdge->twin->target->coords);
+                    quadIndices.append(index);
+                    index++;
+
+                    for (int i = 0; i < 3; ++i)
+                    {
+                        quadCoords.append(currentEdge->target->coords);
+                        currentEdge = currentEdge->next->twin->next;
+                        quadIndices.append(index);
+                        index++;
+                    }
+                    startEdge = startEdge->next->next->twin;
+                }
+            }
+        }
+    }
+
+    glBindBuffer(GL_ARRAY_BUFFER, quadCoordsBO);
+    glBufferData(GL_ARRAY_BUFFER, sizeof(QVector3D)*quadCoords.size(), quadCoords.data(), GL_DYNAMIC_DRAW);
+
+    qDebug() << " → Updated quadCoordsBO";
+
+    glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, quadIndexBO);
+    glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(unsigned int)*quadIndices.size(), quadIndices.data(), GL_DYNAMIC_DRAW);
+
+}
+
 void MainView::updateMeshBuffers(Mesh *currentMesh) {
 
   qDebug() << ".. updateBuffers";
@@ -185,9 +264,9 @@ void MainView::updateMeshBuffers(Mesh *currentMesh) {
   unsigned short n, m;
   HalfEdge* currentEdge;
 
-  if (firstPass){
+  if (firstPass)
       buildCtrlMesh();
-  }
+
 
   vertexCoords.clear();
   vertexCoords.reserve(currentMesh->Vertices.size());
@@ -209,44 +288,16 @@ void MainView::updateMeshBuffers(Mesh *currentMesh) {
 
   polyIndices.clear();
   polyIndices.reserve(currentMesh->HalfEdges.size() + currentMesh->Faces.size());
-  bool isRegular;
-  if (showQuadPatch) // Indexing for quad patches is different and we skip ngons with n != 4
-      for (k=0; k<(GLuint)currentMesh->Faces.size(); k++) {
-          n = currentMesh->Faces[k].val;
-          isRegular = true;
-          if (n == 4)
-          {
-              currentEdge = currentMesh->Faces[k].side;
-              for (int j = 0; j < 4; ++j){
-                  if (currentEdge->target->val != 4 && currentEdge->twin->polygon)
-                      isRegular = false;
-                  currentEdge = currentEdge->next;
-              }
-              if (isRegular){
-                  for (int i = 0; i < 3; i++){
-                  polyIndices.append(currentEdge->target->index);
-                  polyIndices.append(currentEdge->prev->target->index);
-                  polyIndices.append(currentEdge->next->target->index);
-                  polyIndices.append(currentEdge->next->next->target->index);
-                  }
-                  polyIndices.append(maxInt);
-              }
-          }
+
+  for (k=0; k<(GLuint)currentMesh->Faces.size(); k++) {
+      n = currentMesh->Faces[k].val;
+      currentEdge = currentMesh->Faces[k].side;
+      for (m=0; m<n; m++) {
+          polyIndices.append(currentEdge->target->index);
+          currentEdge = currentEdge->next;
       }
-  else
-      for (k=0; k<(GLuint)currentMesh->Faces.size(); k++) {
-          n = currentMesh->Faces[k].val;
-          currentEdge = currentMesh->Faces[k].side;
-          for (m=0; m<n; m++) {
-              polyIndices.append(currentEdge->target->index);
-              currentEdge = currentEdge->next;
-          }
-          polyIndices.append(maxInt);
-      }
-
-
-
-
+      polyIndices.append(maxInt);
+  }
 
   glBindBuffer(GL_ARRAY_BUFFER, meshCoordsBO);
   glBufferData(GL_ARRAY_BUFFER, sizeof(QVector3D)*vertexCoords.size(), vertexCoords.data(), GL_DYNAMIC_DRAW);
@@ -294,11 +345,13 @@ void MainView::updateMatrices() {
 
 void MainView::updateUniforms() {
 
-    mainShaderProg->bind();
-    glUniformMatrix4fv(uniModelViewMatrix, 1, false, modelViewMatrix.data());
-    glUniformMatrix4fv(uniProjectionMatrix, 1, false, projectionMatrix.data());
-    glUniformMatrix3fv(uniNormalMatrix, 1, false, normalMatrix.data());
-    mainShaderProg->release();
+    if (showModel){
+        mainShaderProg->bind();
+        glUniformMatrix4fv(uniModelViewMatrix, 1, false, modelViewMatrix.data());
+        glUniformMatrix4fv(uniProjectionMatrix, 1, false, projectionMatrix.data());
+        glUniformMatrix3fv(uniNormalMatrix, 1, false, normalMatrix.data());
+        mainShaderProg->release();
+    }
 
     if (showQuadPatch){
         tessShaderProg->bind();
@@ -378,11 +431,15 @@ void MainView::paintGL() {
 
     if (showQuadPatch)
     {
-        glBindVertexArray(meshVAO);
+        glBindVertexArray(quadVAO);
         tessShaderProg->bind();
-        glPolygonMode( GL_FRONT_AND_BACK, GL_LINE );
-        glPatchParameteri(GL_PATCH_VERTICES, 12);
-        glDrawElements(GL_PATCHES, meshIBOSize, GL_UNSIGNED_INT, 0);
+        glPatchParameteri(GL_PATCH_VERTICES, 16);
+        if (wireframeMode)
+            glPolygonMode( GL_FRONT_AND_BACK, GL_LINE );
+        else
+            glPolygonMode( GL_FRONT_AND_BACK, GL_FILL );
+
+        glDrawElements(GL_PATCHES, quadCoords.size(), GL_UNSIGNED_INT, 0);
         tessShaderProg->release();
     }
     else if (showModel)
@@ -394,7 +451,6 @@ void MainView::paintGL() {
                 glDrawElements(GL_LINE_LOOP, meshIBOSize, GL_UNSIGNED_INT, 0);
             }
             else {
-                glPolygonMode( GL_FRONT_AND_BACK, GL_FILL );
                 glDrawElements(GL_TRIANGLE_FAN, meshIBOSize, GL_UNSIGNED_INT, 0);
             }
             mainShaderProg->release();
@@ -533,8 +589,6 @@ void MainView::mouseReleaseEvent(QMouseEvent*) {
   rotating = false; // Stop rotating
 }
 
-// ---
-
 void MainView::wheelEvent(QWheelEvent* event) {
   FoV -= event->delta() / 60.0;
   updateMatrices();
@@ -548,8 +602,6 @@ void MainView::keyPressEvent(QKeyEvent* event) {
     break;
   }
 }
-
-// ---
 
 void MainView::onMessageLogged( QOpenGLDebugMessage Message ) {
   qDebug() << " → Log:" << Message;

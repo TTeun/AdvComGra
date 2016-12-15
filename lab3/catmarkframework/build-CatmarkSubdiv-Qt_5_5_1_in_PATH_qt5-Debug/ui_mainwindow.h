@@ -45,8 +45,8 @@ public:
     QGroupBox *quadPatchGB;
     QSpinBox *outerLevelSB;
     QSpinBox *innerLevelSB;
-    QLabel *innerLevelLabel;
     QLabel *outerLevelLabel;
+    QLabel *innerLevelLabel;
     QCheckBox *gridLinesCB;
     QPushButton *applySharpnessPB;
     QCheckBox *showModelCB;
@@ -127,13 +127,13 @@ public:
         innerLevelSB->setEnabled(false);
         innerLevelSB->setGeometry(QRect(10, 20, 41, 27));
         innerLevelSB->setValue(4);
-        innerLevelLabel = new QLabel(quadPatchGB);
-        innerLevelLabel->setObjectName(QStringLiteral("innerLevelLabel"));
-        innerLevelLabel->setGeometry(QRect(60, 55, 91, 17));
         outerLevelLabel = new QLabel(quadPatchGB);
         outerLevelLabel->setObjectName(QStringLiteral("outerLevelLabel"));
-        outerLevelLabel->setEnabled(false);
-        outerLevelLabel->setGeometry(QRect(60, 25, 101, 17));
+        outerLevelLabel->setGeometry(QRect(60, 55, 91, 17));
+        innerLevelLabel = new QLabel(quadPatchGB);
+        innerLevelLabel->setObjectName(QStringLiteral("innerLevelLabel"));
+        innerLevelLabel->setEnabled(false);
+        innerLevelLabel->setGeometry(QRect(60, 25, 101, 17));
         gridLinesCB = new QCheckBox(quadPatchGB);
         gridLinesCB->setObjectName(QStringLiteral("gridLinesCB"));
         gridLinesCB->setEnabled(false);
@@ -172,8 +172,8 @@ public:
         controlMeshCB->setText(QApplication::translate("MainWindow", "Control Mesh", 0));
         label->setText(QApplication::translate("MainWindow", "Sharpness", 0));
         quadPatchGB->setTitle(QApplication::translate("MainWindow", "Quad Patch Setting", 0));
-        innerLevelLabel->setText(QApplication::translate("MainWindow", "Inner Level", 0));
         outerLevelLabel->setText(QApplication::translate("MainWindow", "Outer Level", 0));
+        innerLevelLabel->setText(QApplication::translate("MainWindow", "Inner Level", 0));
         gridLinesCB->setText(QApplication::translate("MainWindow", "Grid Lines", 0));
         applySharpnessPB->setText(QApplication::translate("MainWindow", "Apply Sharpness", 0));
         showModelCB->setText(QApplication::translate("MainWindow", "Show Model", 0));

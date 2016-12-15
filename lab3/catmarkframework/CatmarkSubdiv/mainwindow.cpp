@@ -24,6 +24,9 @@ void MainWindow::importOBJ() {
   ui->MainDisplay->updateMeshBuffers( &ui->MainDisplay->Meshes[0] );
   ui->MainDisplay->modelLoaded = true;
 
+  ui->MainDisplay->Meshes.append(Mesh());
+  subdivideCatmullClark(&ui->MainDisplay->Meshes[0], &ui->MainDisplay->Meshes[1]);
+  ui->MainDisplay->buildQuadMesh();
   ui->MainDisplay->update();
 }
 
@@ -41,7 +44,7 @@ void MainWindow::on_SubdivSteps_valueChanged(int value) {
     subdivideCatmullClark(&ui->MainDisplay->Meshes[k-1], &ui->MainDisplay->Meshes[k]);
   }
   currentMesh = value;
-  ui->MainDisplay->currentMesh = value;
+  ui->MainDisplay->currentMeshIndex = value;
 
   ui->MainDisplay->updateMeshBuffers( &ui->MainDisplay->Meshes[value] );
   ui->limitPointsCB->setChecked(false);
@@ -78,7 +81,6 @@ void MainWindow::on_quadPatchCB_toggled(bool checked)
     ui->gridLinesCB->setEnabled(checked);
 
     ui->showModelCB->setEnabled(not checked);
-    ui->wireFrameCB->setEnabled(not checked);
 
     ui->MainDisplay->updateMatrices();
     ui->MainDisplay->update();
@@ -143,7 +145,7 @@ void MainWindow::on_applySharpnessPB_released()
     }
 
     currentMesh = value;
-    ui->MainDisplay->currentMesh = value;
+    ui->MainDisplay->currentMeshIndex = value;
 
     ui->MainDisplay->updateMeshBuffers( &ui->MainDisplay->Meshes[value] );
     ui->limitPointsCB->setChecked(false);
