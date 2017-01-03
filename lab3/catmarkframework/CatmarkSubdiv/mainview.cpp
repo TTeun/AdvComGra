@@ -28,14 +28,9 @@ MainView::~MainView() {
   glDeleteBuffers(1, &slctIndexBO);
   glDeleteVertexArrays(1, &slctVAO);
 
-  glDeleteBuffers(1, &quadCoordsBO);
-  glDeleteBuffers(1, &quadIndexBO);
-  glDeleteVertexArrays(1, &quadVAO);
-
   debugLogger->stopLogging();
 
   delete mainShaderProg;
-  delete tessShaderProg;
   delete controlMeshShader;
 }
 
@@ -58,16 +53,6 @@ void MainView::createShaderPrograms() {
 
   controlMeshShader->link();
 
-  // Shader for tessellating regular quads
-  tessShaderProg = new QOpenGLShaderProgram();
-  tessShaderProg->addShaderFromSourceFile(QOpenGLShader::Vertex, ":/shaders/tess_vertshader.glsl");
-  tessShaderProg->addShaderFromSourceFile(QOpenGLShader::TessellationControl, ":/shaders/tess_ctrlshader.glsl");
-  tessShaderProg->addShaderFromSourceFile(QOpenGLShader::TessellationEvaluation, ":/shaders/tess_evalshader.glsl");
-  tessShaderProg->addShaderFromSourceFile(QOpenGLShader::Geometry, ":/shaders/tess_geomshader.glsl");
-  tessShaderProg->addShaderFromSourceFile(QOpenGLShader::Fragment, ":/shaders/tess_fragshader.glsl");
-
-  tessShaderProg->link();
-
   // Collect uniforms
   uniModelViewMatrix = glGetUniformLocation(mainShaderProg->programId(), "modelviewmatrix");
   uniProjectionMatrix = glGetUniformLocation(mainShaderProg->programId(), "projectionmatrix");
@@ -76,13 +61,6 @@ void MainView::createShaderPrograms() {
   ctrlUniModelViewMatrix = glGetUniformLocation(controlMeshShader->programId(), "modelviewmatrix");
   ctrlUniProjectionMatrix = glGetUniformLocation(controlMeshShader->programId(), "projectionmatrix");
   ctrlUniNormalMatrix = glGetUniformLocation(controlMeshShader->programId(), "normalmatrix");
-
-  tessUniModelViewMatrix = glGetUniformLocation(tessShaderProg->programId(), "modelviewmatrix");
-  tessUniProjectionMatrix = glGetUniformLocation(tessShaderProg->programId(), "projectionmatrix");
-  tessUniNormalMatrix = glGetUniformLocation(tessShaderProg->programId(), "normalmatrix");
-  uniTessLevelInner = glGetUniformLocation(tessShaderProg->programId(), "TessLevelInner");
-  uniTessLevelOuter = glGetUniformLocation(tessShaderProg->programId(), "TessLevelOuter");
-  uniShowGridLines = glGetUniformLocation(tessShaderProg->programId(), "showGridLines");
 
 }
 
@@ -105,21 +83,6 @@ void MainView::createBuffers() {
 
   glGenBuffers(1, &meshIndexBO);
   glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, meshIndexBO);
-
-  glBindVertexArray(0);
-
-  // Quad Mesh
-
-  glGenVertexArrays(1, &quadVAO);
-  glBindVertexArray(quadVAO);
-
-  glGenBuffers(1, &quadCoordsBO);
-  glBindBuffer(GL_ARRAY_BUFFER, quadCoordsBO);
-  glEnableVertexAttribArray(0);
-  glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 0, 0);
-
-  glGenBuffers(1, &quadIndexBO);
-  glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, quadIndexBO);
 
   glBindVertexArray(0);
 
@@ -206,83 +169,6 @@ void MainView::buildCtrlMesh()
 
     glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, ctrlIndexBO);
     glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(unsigned int)*ctrlIndices.size(), ctrlIndices.data(), GL_DYNAMIC_DRAW);
-
-}
-
-void MainView::buildQuadMesh()
-{
-    // Here we find and index the regular quads from the currently displayed mesh
-    HalfEdge* currentEdge, *startEdge;
-    quadCoords.clear();
-    quadCoords.squeeze();
-
-    quadIndices.clear();
-    quadIndices.squeeze();
-
-    unsigned int k, n;
-    bool isRegular;
-
-    Mesh *currentMesh = limitShown ? limitMesh : &Meshes[currentMeshIndex]; // Load either (subdivided) mesh or limit mesh
-    unsigned int index = 0;
-
-    for (k=0; k<(GLuint)currentMesh->Faces.size(); k++) {
-        n = currentMesh->Faces[k].val;
-        if (n == 4) // We are looking at a quad
-        {
-            isRegular = true;
-            startEdge = currentMesh->Faces[k].side;
-            for (int j = 0; j < 4; ++j) // Check the valencies of the vertices of the face
-            {
-                if (startEdge->target->val != 4){
-                    isRegular = false;
-                    break;
-                }
-
-                startEdge = startEdge->next;
-            }
-
-            if (isRegular)
-            {
-                // Select the one ring neighborhood of the regular face
-
-                /* Slightly ackward loop. Index 16 points as
-
-                0  1  2  3
-                4  5  6  7
-                8  9  10 11
-                12 13 14 15
-
-                where the quad of interest is bound by 5, 6, 9 and 10
-
-                */
-                startEdge = currentMesh->Faces[k].side->twin->next->twin->prev;
-                for (int p = 0; p < 4; ++p)
-                {
-                    currentEdge = startEdge;
-                    quadCoords.append(currentEdge->twin->target->coords);
-                    quadIndices.append(index);
-                    index++;
-
-                    for (int h = 0; h < 3; ++h)
-                    {
-                        quadCoords.append(currentEdge->target->coords);
-                        currentEdge = currentEdge->next->twin->next;
-                        quadIndices.append(index);
-                        index++;
-                    }
-                    startEdge = startEdge->next->next->twin;
-                }
-            }
-        }
-    }
-
-    glBindBuffer(GL_ARRAY_BUFFER, quadCoordsBO);
-    glBufferData(GL_ARRAY_BUFFER, sizeof(QVector3D)*quadCoords.size(), quadCoords.data(), GL_DYNAMIC_DRAW);
-
-    qDebug() << " → Updated quadCoordsBO";
-
-    glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, quadIndexBO);
-    glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(unsigned int)*quadIndices.size(), quadIndices.data(), GL_DYNAMIC_DRAW);
 
 }
 
@@ -383,17 +269,6 @@ void MainView::updateUniforms() {
         mainShaderProg->release();
     }
 
-    if (showQuadPatch){
-        tessShaderProg->bind();
-        glUniform1f(uniTessLevelInner, tessLevelInner);
-        glUniform1f(uniTessLevelOuter, tessLevelOuter);
-        glUniform1f(uniShowGridLines, showGridLines);
-        glUniformMatrix4fv(tessUniModelViewMatrix, 1, false, modelViewMatrix.data());
-        glUniformMatrix4fv(tessUniProjectionMatrix, 1, false, projectionMatrix.data());
-        glUniformMatrix3fv(tessUniNormalMatrix, 1, false, normalMatrix.data());
-        tessShaderProg->release();
-    }
-
     if (showControlMesh){
         controlMeshShader->bind();
         glUniformMatrix4fv(ctrlUniModelViewMatrix, 1, false, modelViewMatrix.data());
@@ -430,11 +305,8 @@ void MainView::initializeGL() {
   maxInt = ((unsigned int) -1);
   glPrimitiveRestartIndex(maxInt);
 
-
   createShaderPrograms();
   createBuffers();
-
-  glPatchParameteri(GL_PATCH_VERTICES, 16);
 
   updateMatrices();
 }
@@ -464,26 +336,18 @@ void MainView::paintGL() {
 
     if (showModel)
     {
-        if (showQuadPatch)
-        {
-            glBindVertexArray(quadVAO);
-            tessShaderProg->bind();
-            glDrawElements(GL_PATCHES, quadCoords.size(), GL_UNSIGNED_INT, 0);
-            tessShaderProg->release();
+
+        glBindVertexArray(meshVAO);
+        mainShaderProg->bind();
+        if (wireframeMode) {
+            glPolygonMode( GL_FRONT_AND_BACK, GL_LINE );
+            glDrawElements(GL_LINE_LOOP, meshIBOSize, GL_UNSIGNED_INT, 0);
         }
-        else
-        {
-            glBindVertexArray(meshVAO);
-            mainShaderProg->bind();
-            if (wireframeMode) {
-                glPolygonMode( GL_FRONT_AND_BACK, GL_LINE );
-                glDrawElements(GL_LINE_LOOP, meshIBOSize, GL_UNSIGNED_INT, 0);
-            }
-            else {
-                glDrawElements(GL_TRIANGLE_FAN, meshIBOSize, GL_UNSIGNED_INT, 0);
-            }
-            mainShaderProg->release();
+        else {
+            glDrawElements(GL_TRIANGLE_FAN, meshIBOSize, GL_UNSIGNED_INT, 0);
         }
+        mainShaderProg->release();
+
     }
 
     if (showControlMesh)

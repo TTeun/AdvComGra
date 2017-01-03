@@ -127,19 +127,6 @@ QGroupBox::title {
         <string>To limit</string>
        </property>
       </widget>
-      <widget class="QCheckBox" name="quadPatchCB">
-       <property name="geometry">
-        <rect>
-         <x>30</x>
-         <y>180</y>
-         <width>161</width>
-         <height>22</height>
-        </rect>
-       </property>
-       <property name="text">
-        <string>Quad Patches</string>
-       </property>
-      </widget>
       <widget class="QCheckBox" name="controlMeshCB">
        <property name="geometry">
         <rect>
@@ -151,6 +138,9 @@ QGroupBox::title {
        </property>
        <property name="text">
         <string>Control Mesh</string>
+       </property>
+       <property name="checked">
+        <bool>true</bool>
        </property>
       </widget>
       <widget class="QDoubleSpinBox" name="sharpnessSlider">
@@ -175,96 +165,6 @@ QGroupBox::title {
        <property name="text">
         <string>Sharpness</string>
        </property>
-      </widget>
-      <widget class="QGroupBox" name="quadPatchGB">
-       <property name="enabled">
-        <bool>false</bool>
-       </property>
-       <property name="geometry">
-        <rect>
-         <x>20</x>
-         <y>215</y>
-         <width>166</width>
-         <height>121</height>
-        </rect>
-       </property>
-       <property name="title">
-        <string>Quad Patch Setting</string>
-       </property>
-       <widget class="QSpinBox" name="outerLevelSB">
-        <property name="geometry">
-         <rect>
-          <x>10</x>
-          <y>50</y>
-          <width>41</width>
-          <height>27</height>
-         </rect>
-        </property>
-        <property name="value">
-         <number>4</number>
-        </property>
-       </widget>
-       <widget class="QSpinBox" name="innerLevelSB">
-        <property name="enabled">
-         <bool>false</bool>
-        </property>
-        <property name="geometry">
-         <rect>
-          <x>10</x>
-          <y>20</y>
-          <width>41</width>
-          <height>27</height>
-         </rect>
-        </property>
-        <property name="value">
-         <number>4</number>
-        </property>
-       </widget>
-       <widget class="QLabel" name="outerLevelLabel">
-        <property name="geometry">
-         <rect>
-          <x>60</x>
-          <y>55</y>
-          <width>91</width>
-          <height>17</height>
-         </rect>
-        </property>
-        <property name="text">
-         <string>Outer Level</string>
-        </property>
-       </widget>
-       <widget class="QLabel" name="innerLevelLabel">
-        <property name="enabled">
-         <bool>false</bool>
-        </property>
-        <property name="geometry">
-         <rect>
-          <x>60</x>
-          <y>25</y>
-          <width>101</width>
-          <height>17</height>
-         </rect>
-        </property>
-        <property name="text">
-         <string>Inner Level</string>
-        </property>
-       </widget>
-       <widget class="QCheckBox" name="gridLinesCB">
-        <property name="enabled">
-         <bool>false</bool>
-        </property>
-        <property name="geometry">
-         <rect>
-          <x>10</x>
-          <y>85</y>
-          <width>87</width>
-          <height>22</height>
-         </rect>
-        </property>
-        <property name="text">
-         <string>Grid Lines</string>
-        </property>
-       </widget>
       </widget>
       <widget class="QPushButton" name="applySharpnessPB">
        <property name="geometry">

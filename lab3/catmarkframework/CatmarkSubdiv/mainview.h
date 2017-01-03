@@ -24,8 +24,7 @@ public:
   size_t currentMeshIndex = 0; // Keep track of the level of subdivision
   bool modelLoaded;
   bool wireframeMode;
-  bool showQuadPatch = false;   // Show quads using tessellation shader
-  bool showControlMesh = false; // Show the control mesh
+  bool showControlMesh = true; // Show the control mesh
 
   float FoV;
   float dispRatio;
@@ -36,7 +35,6 @@ public:
   void updateMatrices();
   void updateUniforms();
   void updateMeshBuffers(Mesh *currentMesh);
-  void buildQuadMesh(); // Builds the mesh of regular quads for the tessellation shader
 
   QVector<Mesh> Meshes;     // Moved here from the MainWindow class for slightly easier jumpin between meshes
   Mesh *limitMesh;          // Pointer to limit mesh
@@ -76,17 +74,13 @@ private:
   // Uniforms
   GLint uniModelViewMatrix, uniProjectionMatrix, uniNormalMatrix;
   GLint ctrlUniModelViewMatrix, ctrlUniProjectionMatrix, ctrlUniNormalMatrix;
-  GLint tessUniModelViewMatrix, tessUniProjectionMatrix, tessUniNormalMatrix;
-  GLint uniTessLevelInner;
-  GLint uniTessLevelOuter;
   GLint uniShowGridLines;
 
   // ---
 
-  QOpenGLShaderProgram* mainShaderProg, *tessShaderProg, *controlMeshShader;
+  QOpenGLShaderProgram* mainShaderProg, *controlMeshShader;
 
   GLuint meshVAO, meshCoordsBO, meshNormalsBO, meshIndexBO;
-  GLuint quadVAO, quadCoordsBO, quadIndexBO;
   GLuint ctrlVAO, ctrlCoordsBO, ctrlIndexBO, ctrlColourBO;
   GLuint slctVAO, slctCoordsBO, slctIndexBO, slctColourBO;
   unsigned int meshIBOSize;
@@ -96,9 +90,6 @@ private:
   QVector<QVector3D> vertexCoords;
   QVector<QVector3D> vertexNormals;
   QVector<unsigned int> polyIndices;
-
-  QVector<QVector3D> quadCoords;
-  QVector<unsigned int> quadIndices;
 
   QVector<QVector3D> ctrlCoords;
   QVector<QVector3D> ctrlColours;

@@ -46,7 +46,6 @@ void MainWindow::on_SubdivSteps_valueChanged(int value) {
   ui->MainDisplay->currentMeshIndex = value;
 
   ui->MainDisplay->updateMeshBuffers( &ui->MainDisplay->Meshes[value] );
-  ui->MainDisplay->buildQuadMesh();
   ui->limitPointsCB->setChecked(false);
 }
 
@@ -64,32 +63,11 @@ void MainWindow::on_limitPointsCB_toggled(bool checked)
         ui->MainDisplay->limitMesh = new Mesh();
         toLimitMesh(&ui->MainDisplay->Meshes[currentMesh], ui->MainDisplay->limitMesh); // Implementation in meshtools.cpp
         ui->MainDisplay->updateMeshBuffers( ui->MainDisplay->limitMesh );
-        ui->MainDisplay->buildQuadMesh(); // Quad mesh needs to be rebuild in case we want to swap between subdiv or limit mesh
 
     } else {
         ui->MainDisplay->updateMeshBuffers( &ui->MainDisplay->Meshes[currentMesh] );
-        ui->MainDisplay->buildQuadMesh();
     }
 
-}
-
-void MainWindow::on_quadPatchCB_toggled(bool checked)
-{
-    ui->MainDisplay->showQuadPatch = checked;
-    ui->MainDisplay->updateMeshBuffers( &ui->MainDisplay->Meshes[currentMesh] );
-
-    ui->MainDisplay->buildQuadMesh();
-
-    // Show the quad ui features
-    ui->quadPatchGB->setEnabled(checked);
-    ui->innerLevelSB->setEnabled(checked);
-    ui->outerLevelSB->setEnabled(checked);
-    ui->innerLevelLabel->setEnabled(checked);
-    ui->outerLevelLabel->setEnabled(checked);
-    ui->gridLinesCB->setEnabled(checked);
-
-    ui->MainDisplay->updateMatrices();
-    ui->MainDisplay->update();
 }
 
 void MainWindow::on_controlMeshCB_toggled(bool checked)
@@ -98,28 +76,10 @@ void MainWindow::on_controlMeshCB_toggled(bool checked)
     ui->MainDisplay->update();
 }
 
-void MainWindow::on_gridLinesCB_toggled(bool checked)
-{
-    ui->MainDisplay->showGridLines = checked;
-    ui->MainDisplay->update();
-}
-
 void MainWindow::on_showModelCB_toggled(bool checked)
 {
     ui->MainDisplay->showModel = checked;
     ui->MainDisplay->update();
-}
-
-void MainWindow::on_innerLevelSB_valueChanged(int arg1)
-{
-    ui->MainDisplay->tessLevelInner = arg1;
-    ui->MainDisplay->updateMatrices();
-}
-
-void MainWindow::on_outerLevelSB_valueChanged(int arg1)
-{
-    ui->MainDisplay->tessLevelOuter = arg1;
-    ui->MainDisplay->updateMatrices();
 }
 
 // The sharpness handling functions
