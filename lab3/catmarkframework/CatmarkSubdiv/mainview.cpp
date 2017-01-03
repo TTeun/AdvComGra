@@ -128,6 +128,28 @@ void MainView::createBuffers() {
 
 void MainView::buildCtrlMesh()
 {
+  QVector3D av;
+  for (int i = 0; i < Meshes[0].Vertices.size(); ++i){
+      av += Meshes[0].Vertices[i].coords;
+    }
+  av /= Meshes[0].Vertices.size();
+  qDebug() << "Average" << av << '\n';
+
+  for (int i = 0; i < Meshes[0].Vertices.size(); ++i){
+      Meshes[0].Vertices[i].coords -= av;
+    }
+
+  float max = 0;
+  for (int i = 0; i < Meshes[0].Vertices.size(); ++i){
+      max = qMax(max, Meshes[0].Vertices[i].coords.length());
+    }
+
+  for (int i = 0; i < Meshes[0].Vertices.size(); ++i){
+      Meshes[0].Vertices[i].coords /= max;
+    }
+
+
+  qDebug() << max;
     // Here we build the control mesh which can be viewed over the subdivided mesh of the quad mesh
     firstPass = false;
 
@@ -146,8 +168,8 @@ void MainView::buildCtrlMesh()
             ctrlCoords.append(currentEdge->twin->target->coords);
             s = currentEdge->sharpness;
             if (s > 0){
-                ctrlColours.append(QVector3D(0.6, 0.0, s / 4.0 ));
-                ctrlColours.append(QVector3D(0.6, 0.0, s / 4.0 ));
+                ctrlColours.append(QVector3D(0.6, 0.0, 1 - s / 4.0 ));
+                ctrlColours.append(QVector3D(0.6, 0.0, 1 - s / 4.0 ));
               } else {
                 ctrlColours.append(QVector3D(0.6, 0.8, 0.0 ));
                 ctrlColours.append(QVector3D(0.6, 0.8, 0.0 ));
@@ -305,6 +327,15 @@ void MainView::initializeGL() {
   maxInt = ((unsigned int) -1);
   glPrimitiveRestartIndex(maxInt);
 
+
+  // This is nice for thickening the lines to make figures
+  glEnable(GL_LINE_SMOOTH);
+  glLineWidth(0.5);
+  glEnable(GL_BLEND);
+  glHint(GL_LINE_SMOOTH_HINT, GL_NICEST);
+
+
+
   createShaderPrograms();
   createBuffers();
 
@@ -324,7 +355,7 @@ void MainView::paintGL() {
 
   if (modelLoaded) {
 
-    glClearColor(0.3,0.3,0.3, 1.0);
+    glClearColor(0.4,0.4,0.4, 1.0);
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
     updateUniforms();
@@ -352,6 +383,7 @@ void MainView::paintGL() {
 
     if (showControlMesh)
     {
+
         controlMeshShader->bind();
         glBindVertexArray(ctrlVAO);
         glDrawElements(GL_LINES, ctrlIndices.size(), GL_UNSIGNED_INT, 0);
