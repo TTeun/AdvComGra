@@ -168,30 +168,33 @@ void MainView::buildCtrlMesh()
     // Here we build the control mesh which can be viewed over the subdivided mesh of the quad mesh
     firstPass = false;
 
-    unsigned int k, n, m;
+    unsigned int k;
     HalfEdge* currentEdge;
     ctrlCoords.clear();
-    ctrlCoords.reserve(Meshes[0].Vertices.size());
-
+    ctrlColours.clear();
     ctrlIndices.clear();
-    ctrlIndices.reserve(Meshes[0].HalfEdges.size() + Meshes[0].Faces.size());
 
-    for (k=0; k<(GLuint)Meshes[0].Vertices.size(); k++) { // Copy all vertices and make then yellow
-      ctrlCoords.append(Meshes[0].Vertices[k].coords);
-      ctrlColours.append(QVector3D(0.6, 0.8, 0.0));
-    }
-    for (k=0; k<(GLuint)Meshes[0].Faces.size(); k++) { // Copy the edges (display mode will be GL_LINES)
-        n = Meshes[0].Faces[k].val;
-        currentEdge = Meshes[0].Faces[k].side;
-        for (m=0; m<n; m++) {
-            if (currentEdge->index < currentEdge->twin->index){
-                ctrlIndices.append(currentEdge->twin->target->index);
-                ctrlIndices.append(currentEdge->target->index);
-            }
-            currentEdge = currentEdge->next;
-        }
-        ctrlIndices.append(maxInt);
-    }
+    size_t index = 0, s;
+    for (k = 0; k <Meshes[0].HalfEdges.size(); k++)
+    {
+        currentEdge = &Meshes[0].HalfEdges[k];
+        if (currentEdge->index < currentEdge->twin->index){
+            ctrlCoords.append(currentEdge->target->coords);
+            ctrlCoords.append(currentEdge->twin->target->coords);
+            s = currentEdge->sharpness;
+            if (s > 0){
+                ctrlColours.append(QVector3D(0.6, 0.0, s / 4.0 ));
+                ctrlColours.append(QVector3D(0.6, 0.0, s / 4.0 ));
+              } else {
+                ctrlColours.append(QVector3D(0.6, 0.8, 0.0 ));
+                ctrlColours.append(QVector3D(0.6, 0.8, 0.0 ));
+              }
+            ctrlIndices.append(index);
+            ctrlIndices.append(index + 1);
+            index += 2;
+            ctrlIndices.append(maxInt);
+          }
+      }
 
     glBindBuffer(GL_ARRAY_BUFFER, ctrlCoordsBO);
     glBufferData(GL_ARRAY_BUFFER, sizeof(QVector3D)*ctrlCoords.size(), ctrlCoords.data(), GL_DYNAMIC_DRAW);
@@ -449,7 +452,7 @@ void MainView::paintGL() {
 
   if (modelLoaded) {
 
-    glClearColor(0.0, 0.0, 0.0, 1.0);
+    glClearColor(0.3,0.3,0.3, 1.0);
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
     updateUniforms();

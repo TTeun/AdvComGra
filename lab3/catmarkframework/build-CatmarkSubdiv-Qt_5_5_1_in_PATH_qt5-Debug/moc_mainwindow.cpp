@@ -39,13 +39,13 @@ QT_MOC_LITERAL(6, 90, 7), // "checked"
 QT_MOC_LITERAL(7, 98, 24), // "on_limitPointsCB_toggled"
 QT_MOC_LITERAL(8, 123, 22), // "on_quadPatchCB_toggled"
 QT_MOC_LITERAL(9, 146, 24), // "on_controlMeshCB_toggled"
-QT_MOC_LITERAL(10, 171, 34), // "on_sharpnessSlider_editingFin..."
-QT_MOC_LITERAL(11, 206, 28), // "on_innerLevelSB_valueChanged"
-QT_MOC_LITERAL(12, 235, 4), // "arg1"
-QT_MOC_LITERAL(13, 240, 28), // "on_outerLevelSB_valueChanged"
-QT_MOC_LITERAL(14, 269, 22), // "on_gridLinesCB_toggled"
-QT_MOC_LITERAL(15, 292, 28), // "on_applySharpnessPB_released"
-QT_MOC_LITERAL(16, 321, 22) // "on_showModelCB_toggled"
+QT_MOC_LITERAL(10, 171, 28), // "on_innerLevelSB_valueChanged"
+QT_MOC_LITERAL(11, 200, 4), // "arg1"
+QT_MOC_LITERAL(12, 205, 28), // "on_outerLevelSB_valueChanged"
+QT_MOC_LITERAL(13, 234, 22), // "on_gridLinesCB_toggled"
+QT_MOC_LITERAL(14, 257, 22), // "on_showModelCB_toggled"
+QT_MOC_LITERAL(15, 280, 28), // "on_applySharpnessPB_released"
+QT_MOC_LITERAL(16, 309, 34) // "on_sharpnessSlider_editingFin..."
 
     },
     "MainWindow\0on_ImportOBJ_clicked\0\0"
@@ -53,12 +53,11 @@ QT_MOC_LITERAL(16, 321, 22) // "on_showModelCB_toggled"
     "on_wireFrameCB_toggled\0checked\0"
     "on_limitPointsCB_toggled\0"
     "on_quadPatchCB_toggled\0on_controlMeshCB_toggled\0"
-    "on_sharpnessSlider_editingFinished\0"
     "on_innerLevelSB_valueChanged\0arg1\0"
     "on_outerLevelSB_valueChanged\0"
-    "on_gridLinesCB_toggled\0"
+    "on_gridLinesCB_toggled\0on_showModelCB_toggled\0"
     "on_applySharpnessPB_released\0"
-    "on_showModelCB_toggled"
+    "on_sharpnessSlider_editingFinished"
 };
 #undef QT_MOC_LITERAL
 
@@ -82,12 +81,12 @@ static const uint qt_meta_data_MainWindow[] = {
        7,    1,   81,    2, 0x08 /* Private */,
        8,    1,   84,    2, 0x08 /* Private */,
        9,    1,   87,    2, 0x08 /* Private */,
-      10,    0,   90,    2, 0x08 /* Private */,
-      11,    1,   91,    2, 0x08 /* Private */,
-      13,    1,   94,    2, 0x08 /* Private */,
-      14,    1,   97,    2, 0x08 /* Private */,
-      15,    0,  100,    2, 0x08 /* Private */,
-      16,    1,  101,    2, 0x08 /* Private */,
+      10,    1,   90,    2, 0x08 /* Private */,
+      12,    1,   93,    2, 0x08 /* Private */,
+      13,    1,   96,    2, 0x08 /* Private */,
+      14,    1,   99,    2, 0x08 /* Private */,
+      15,    0,  102,    2, 0x08 /* Private */,
+      16,    0,  103,    2, 0x08 /* Private */,
 
  // slots: parameters
     QMetaType::Void,
@@ -96,12 +95,12 @@ static const uint qt_meta_data_MainWindow[] = {
     QMetaType::Void, QMetaType::Bool,    6,
     QMetaType::Void, QMetaType::Bool,    6,
     QMetaType::Void, QMetaType::Bool,    6,
-    QMetaType::Void,
-    QMetaType::Void, QMetaType::Int,   12,
-    QMetaType::Void, QMetaType::Int,   12,
+    QMetaType::Void, QMetaType::Int,   11,
+    QMetaType::Void, QMetaType::Int,   11,
+    QMetaType::Void, QMetaType::Bool,    6,
     QMetaType::Void, QMetaType::Bool,    6,
     QMetaType::Void,
-    QMetaType::Void, QMetaType::Bool,    6,
+    QMetaType::Void,
 
        0        // eod
 };
@@ -118,12 +117,12 @@ void MainWindow::qt_static_metacall(QObject *_o, QMetaObject::Call _c, int _id, 
         case 3: _t->on_limitPointsCB_toggled((*reinterpret_cast< bool(*)>(_a[1]))); break;
         case 4: _t->on_quadPatchCB_toggled((*reinterpret_cast< bool(*)>(_a[1]))); break;
         case 5: _t->on_controlMeshCB_toggled((*reinterpret_cast< bool(*)>(_a[1]))); break;
-        case 6: _t->on_sharpnessSlider_editingFinished(); break;
-        case 7: _t->on_innerLevelSB_valueChanged((*reinterpret_cast< int(*)>(_a[1]))); break;
-        case 8: _t->on_outerLevelSB_valueChanged((*reinterpret_cast< int(*)>(_a[1]))); break;
-        case 9: _t->on_gridLinesCB_toggled((*reinterpret_cast< bool(*)>(_a[1]))); break;
+        case 6: _t->on_innerLevelSB_valueChanged((*reinterpret_cast< int(*)>(_a[1]))); break;
+        case 7: _t->on_outerLevelSB_valueChanged((*reinterpret_cast< int(*)>(_a[1]))); break;
+        case 8: _t->on_gridLinesCB_toggled((*reinterpret_cast< bool(*)>(_a[1]))); break;
+        case 9: _t->on_showModelCB_toggled((*reinterpret_cast< bool(*)>(_a[1]))); break;
         case 10: _t->on_applySharpnessPB_released(); break;
-        case 11: _t->on_showModelCB_toggled((*reinterpret_cast< bool(*)>(_a[1]))); break;
+        case 11: _t->on_sharpnessSlider_editingFinished(); break;
         default: ;
         }
     }

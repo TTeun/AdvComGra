@@ -51,6 +51,7 @@ public:
   // This if setting the sharpness
   void *setSharpnessSlider(double sharpness);
   int selected_index = -1;
+  void buildCtrlMesh();  // Build the control mesh. Happens only once on firstPass, so can private
 
 
 protected:
@@ -110,7 +111,6 @@ private:
 
   void createShaderPrograms();
   void createBuffers();  
-  void buildCtrlMesh();  // Build the control mesh. Happens only once on firstPass, so can private
 
   QVector2D lastPos;     // Keeping track of position for mouse rotation
   bool rotating = false;

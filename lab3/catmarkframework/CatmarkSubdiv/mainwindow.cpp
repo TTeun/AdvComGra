@@ -137,6 +137,7 @@ void MainWindow::on_applySharpnessPB_released()
 
     currentMesh = value;
     ui->MainDisplay->currentMeshIndex = value;
+    ui->MainDisplay->selected_index = -1;
 
     ui->MainDisplay->updateMeshBuffers( &ui->MainDisplay->Meshes[value] );
     ui->limitPointsCB->setChecked(false);
@@ -152,6 +153,7 @@ void MainWindow::on_sharpnessSlider_editingFinished()
     currentEdge = &ui->MainDisplay->Meshes[0].HalfEdges[ui->MainDisplay->selected_index];
     currentEdge->sharpness = ui->sharpnessSlider->value();
     currentEdge->twin->sharpness = ui->sharpnessSlider->value();
+    ui->MainDisplay->buildCtrlMesh();
 
 }
 
