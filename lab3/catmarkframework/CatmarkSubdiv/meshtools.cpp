@@ -163,16 +163,11 @@ void subdivideCatmullClark(Mesh* inputMesh, Mesh* subdivMesh) {
   }
 }
 
-// ---
-
-QVector3D vertexPoint(HalfEdge* firstEdge, Mesh* subdivMesh) {
-    // This functions handels vertices with (possibly fractional) sharpness, it is still a mess.
-    // I did not yet spend time making it clearer because it isn't even part of lab3, but I did
-    // it for fun :)
+QVector3D ccVertexPoint(HalfEdge* firstEdge, Mesh* subdivMesh) {
   unsigned short k, n;
   QVector3D sumStarPts, sumFacePts;
-  QVector3D vertexPt = QVector3D(0.0, 0.0, 0.0);
-
+  QVector3D vertexPt;
+  float stencilValue;
   HalfEdge* currentEdge;
   Vertex* currentVertex;
 
@@ -183,6 +178,33 @@ QVector3D vertexPoint(HalfEdge* firstEdge, Mesh* subdivMesh) {
   sumFacePts = QVector3D();
   currentEdge = firstEdge;
 
+    for (k=0; k<n; k++) {
+      sumStarPts += currentEdge->target->coords;
+      sumFacePts += subdivMesh->Vertices[currentEdge->polygon->index].coords;
+      currentEdge = currentEdge->prev->twin;
+    }
+
+    vertexPt = ((n-2)*currentVertex->coords + sumStarPts/n + sumFacePts/n)/n;
+
+
+  return vertexPt;
+
+}
+QVector3D vertexPoint(HalfEdge* firstEdge, Mesh* subdivMesh) {
+    // This functions handels vertices with (possibly fractional) sharpness, it is still a mess.
+    // I did not yet spend time making it clearer because it isn't even part of lab3, but I did
+    // it for fun :)
+  unsigned short k, n;
+  QVector3D vertexPt = QVector3D(0.0, 0.0, 0.0);
+
+  HalfEdge* currentEdge;
+  Vertex* currentVertex;
+
+  currentVertex = firstEdge->twin->target;
+  n = currentVertex->val;
+
+  currentEdge = firstEdge;
+
   float sharpness = 0.0;
   int incidentCreases = 0;
   currentEdge = firstEdge;
@@ -190,7 +212,7 @@ QVector3D vertexPoint(HalfEdge* firstEdge, Mesh* subdivMesh) {
       if (currentEdge->sharpness > 0.0){
           sharpness += currentEdge->sharpness;
           ++incidentCreases;
-          vertexPt += currentEdge->target->coords;
+          vertexPt += ccVertexPoint(currentEdge, subdivMesh);
       }
       currentEdge = currentEdge->prev->twin;
   }
@@ -205,36 +227,11 @@ QVector3D vertexPoint(HalfEdge* firstEdge, Mesh* subdivMesh) {
       if (sharpness < 2.0){
           sharpness /= 2; // Average edge sharpness of incident edges
           vertexPt *= sharpness;
-          vertexPt += (1-sharpness) * currentVertex->coords;
+          vertexPt += (1-sharpness) * ccVertexPoint(currentEdge, subdivMesh);
       }
       return vertexPt;
   }
-
-  // Catmull-Clark (also supporting initial meshes containing n-gons)
-  if (HalfEdge* boundaryEdge = vertOnBoundary(currentVertex)) {
-    if (boundaryEdge->twin->target->val == 2) {
-      // Interpolate corners
-      return boundaryEdge->twin->target->coords;
-    }
-    else {
-      vertexPt  = 1.0 * boundaryEdge->target->coords;
-      vertexPt += 6.0 * boundaryEdge->twin->target->coords;
-      vertexPt += 1.0 * boundaryEdge->prev->twin->target->coords;
-      vertexPt /= 8.0;
-    }
-  }
-  else {
-    for (k=0; k<n; k++) {
-      sumStarPts += currentEdge->target->coords;
-      sumFacePts += subdivMesh->Vertices[currentEdge->polygon->index].coords;
-      currentEdge = currentEdge->prev->twin;
-    }
-
-    vertexPt = ((n-2)*currentVertex->coords + sumStarPts/n + sumFacePts/n)/n;
-  }
-
-  return vertexPt;
-
+  return ccVertexPoint(currentEdge, subdivMesh);
 }
 
 QVector3D ccEdgePoint(HalfEdge *currentEdge, Mesh *subdivMesh){

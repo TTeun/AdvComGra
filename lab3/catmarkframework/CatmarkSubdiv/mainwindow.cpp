@@ -79,7 +79,7 @@ void MainWindow::on_applySharpnessPB_released()
     }
 
     currentMesh = value;
-    ui->MainDisplay->selected_index = -1;
+//    ui->MainDisplay->selected_index = -1;
 
     ui->MainDisplay->updateMeshBuffers( &ui->MainDisplay->Meshes[value] );
 }
@@ -93,11 +93,13 @@ void MainWindow::on_sharpnessSlider_editingFinished()
   if (ui->MainDisplay->selected_index >=  ui->MainDisplay->Meshes[0].HalfEdges.size() || (ui->MainDisplay->selected_index <= 0))
     return;
 
+  qDebug() << ui->sharpnessSlider->value();
+
   HalfEdge *currentEdge;
   currentEdge = &ui->MainDisplay->Meshes[0].HalfEdges[ui->MainDisplay->selected_index];
-  currentEdge->sharpness = (float)(ui->sharpnessSlider->value());
-  if (currentEdge->twin)
-    currentEdge->twin->sharpness = currentEdge->sharpness;
+  currentEdge->sharpness = ui->sharpnessSlider->value();
+  currentEdge->twin->sharpness = currentEdge->sharpness;
 
   ui->MainDisplay->buildCtrlMesh();
+  on_applySharpnessPB_released();
 }
