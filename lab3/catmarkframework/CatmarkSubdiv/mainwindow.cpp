@@ -43,7 +43,6 @@ void MainWindow::on_SubdivSteps_valueChanged(int value) {
     subdivideCatmullClark(&ui->MainDisplay->Meshes[k-1], &ui->MainDisplay->Meshes[k]);
   }
   currentMesh = value;
-  ui->MainDisplay->currentMeshIndex = value;
 
   ui->MainDisplay->updateMeshBuffers( &ui->MainDisplay->Meshes[value] );
 }
@@ -80,7 +79,6 @@ void MainWindow::on_applySharpnessPB_released()
     }
 
     currentMesh = value;
-    ui->MainDisplay->currentMeshIndex = value;
     ui->MainDisplay->selected_index = -1;
 
     ui->MainDisplay->updateMeshBuffers( &ui->MainDisplay->Meshes[value] );
@@ -92,12 +90,14 @@ void MainWindow::setSharpness(double value){
 
 void MainWindow::on_sharpnessSlider_editingFinished()
 {
-    HalfEdge *currentEdge;
-    currentEdge = &ui->MainDisplay->Meshes[0].HalfEdges[ui->MainDisplay->selected_index];
-    currentEdge->sharpness = ui->sharpnessSlider->value();
-    currentEdge->twin->sharpness = ui->sharpnessSlider->value();
-    ui->MainDisplay->buildCtrlMesh();
+  if (ui->MainDisplay->selected_index >=  ui->MainDisplay->Meshes[0].HalfEdges.size() || (ui->MainDisplay->selected_index <= 0))
+    return;
 
+  HalfEdge *currentEdge;
+  currentEdge = &ui->MainDisplay->Meshes[0].HalfEdges[ui->MainDisplay->selected_index];
+  currentEdge->sharpness = (float)(ui->sharpnessSlider->value());
+  if (currentEdge->twin)
+    currentEdge->twin->sharpness = currentEdge->sharpness;
+
+  ui->MainDisplay->buildCtrlMesh();
 }
-
-

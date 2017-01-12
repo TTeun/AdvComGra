@@ -21,7 +21,6 @@ public:
   MainWindow *mainWindow;
   float rotX = 0, rotY = 0;
 
-  size_t currentMeshIndex = 0; // Keep track of the level of subdivision
   bool modelLoaded;
   bool wireframeMode;
   bool showControlMesh = true; // Show the control mesh

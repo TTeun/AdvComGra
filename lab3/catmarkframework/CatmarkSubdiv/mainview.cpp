@@ -182,6 +182,7 @@ void MainView::buildCtrlMesh()
           }
       }
 
+
     glBindBuffer(GL_ARRAY_BUFFER, ctrlCoordsBO);
     glBufferData(GL_ARRAY_BUFFER, sizeof(QVector3D)*ctrlCoords.size(), ctrlCoords.data(), GL_DYNAMIC_DRAW);
 
@@ -466,7 +467,10 @@ void MainView::mousePressEvent(QMouseEvent* event) {
 
       selected_index = minIndex;
 
-      mainWindow->setSharpness(Meshes[0].HalfEdges[selected_index].sharpness); // Upload this sharpness to the GUI
+      if (selected_index > -1)
+        mainWindow->setSharpness(Meshes[0].HalfEdges[selected_index].sharpness); // Upload this sharpness to the GUI
+
+      qDebug() << "asdasddsasa";
       updateMatrices();
 
       slctCoords.clear();
