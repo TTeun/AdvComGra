@@ -40,7 +40,6 @@ public:
     QCheckBox *controlMeshCB;
     QDoubleSpinBox *sharpnessSlider;
     QLabel *label;
-    QPushButton *applySharpnessPB;
     QCheckBox *showModelCB;
     MainView *MainDisplay;
 
@@ -49,19 +48,6 @@ public:
         if (MainWindow->objectName().isEmpty())
             MainWindow->setObjectName(QStringLiteral("MainWindow"));
         MainWindow->resize(1366, 768);
-        MainWindow->setStyleSheet(QLatin1String("/* Groupbox */\n"
-"\n"
-"QGroupBox {\n"
-"    border: 1px solid #DDD;\n"
-"    border-radius: 9px;\n"
-"    margin-top: 9px;\n"
-"}\n"
-"\n"
-"QGroupBox::title {\n"
-"    subcontrol-origin: margin;\n"
-"    left: 10px;\n"
-"    padding: 0 3px 0 3px;\n"
-"}"));
         centralWidget = new QWidget(MainWindow);
         centralWidget->setObjectName(QStringLiteral("centralWidget"));
         horizontalLayout = new QHBoxLayout(centralWidget);
@@ -77,6 +63,7 @@ public:
         sizePolicy.setHeightForWidth(SettingsGB->sizePolicy().hasHeightForWidth());
         SettingsGB->setSizePolicy(sizePolicy);
         SettingsGB->setMinimumSize(QSize(220, 0));
+        SettingsGB->setStyleSheet(QStringLiteral(""));
         SettingsGB->setCheckable(false);
         SubdivSteps = new QSpinBox(SettingsGB);
         SubdivSteps->setObjectName(QStringLiteral("SubdivSteps"));
@@ -97,13 +84,10 @@ public:
         controlMeshCB->setChecked(true);
         sharpnessSlider = new QDoubleSpinBox(SettingsGB);
         sharpnessSlider->setObjectName(QStringLiteral("sharpnessSlider"));
-        sharpnessSlider->setGeometry(QRect(20, 490, 62, 27));
+        sharpnessSlider->setGeometry(QRect(100, 455, 62, 27));
         label = new QLabel(SettingsGB);
         label->setObjectName(QStringLiteral("label"));
         label->setGeometry(QRect(20, 460, 111, 17));
-        applySharpnessPB = new QPushButton(SettingsGB);
-        applySharpnessPB->setObjectName(QStringLiteral("applySharpnessPB"));
-        applySharpnessPB->setGeometry(QRect(95, 490, 106, 27));
         showModelCB = new QCheckBox(SettingsGB);
         showModelCB->setObjectName(QStringLiteral("showModelCB"));
         showModelCB->setGeometry(QRect(30, 90, 131, 22));
@@ -132,7 +116,6 @@ public:
         wireFrameCB->setText(QApplication::translate("MainWindow", "Wireframe", 0));
         controlMeshCB->setText(QApplication::translate("MainWindow", "Control Mesh", 0));
         label->setText(QApplication::translate("MainWindow", "Sharpness", 0));
-        applySharpnessPB->setText(QApplication::translate("MainWindow", "Apply Sharpness", 0));
         showModelCB->setText(QApplication::translate("MainWindow", "Show Model", 0));
     } // retranslateUi
 

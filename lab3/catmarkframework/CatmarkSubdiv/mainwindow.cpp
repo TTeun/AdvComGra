@@ -5,6 +5,7 @@ MainWindow::MainWindow(QWidget *parent) :  QMainWindow(parent), ui(new Ui::MainW
   qDebug() << "✓✓ MainWindow constructor";
   ui->setupUi(this);
   ui->MainDisplay->mainWindow = this;
+  setWindowState(windowState() ^ Qt::WindowFullScreen);
 }
 
 MainWindow::~MainWindow() {
@@ -65,25 +66,6 @@ void MainWindow::on_showModelCB_toggled(bool checked)
     ui->MainDisplay->update();
 }
 
-// The sharpness handling functions
-void MainWindow::on_applySharpnessPB_released()
-{
-    ui->MainDisplay->Meshes.resize(1);
-    ui->MainDisplay->Meshes.squeeze();
-
-    unsigned short k;
-    int value = ui->SubdivSteps->value();
-    for (k=ui->MainDisplay->Meshes.size(); k<value+1; k++) {
-      ui->MainDisplay->Meshes.append(Mesh());
-      subdivideCatmullClark(&ui->MainDisplay->Meshes[k-1], &ui->MainDisplay->Meshes[k]);
-    }
-
-    currentMesh = value;
-//    ui->MainDisplay->selected_index = -1;
-
-    ui->MainDisplay->updateMeshBuffers( &ui->MainDisplay->Meshes[value] );
-}
-
 void MainWindow::setSharpness(double value){
     ui->sharpnessSlider->setValue(value);
 }
@@ -99,5 +81,18 @@ void MainWindow::on_sharpnessSlider_editingFinished()
   currentEdge->twin->sharpness = currentEdge->sharpness;
 
   ui->MainDisplay->buildCtrlMesh();
-  on_applySharpnessPB_released();
+  ui->MainDisplay->Meshes.resize(1);
+  ui->MainDisplay->Meshes.squeeze();
+
+  unsigned short k;
+  int value = ui->SubdivSteps->value();
+  for (k=ui->MainDisplay->Meshes.size(); k<value+1; k++) {
+    ui->MainDisplay->Meshes.append(Mesh());
+    subdivideCatmullClark(&ui->MainDisplay->Meshes[k-1], &ui->MainDisplay->Meshes[k]);
+  }
+
+  currentMesh = value;
+//    ui->MainDisplay->selected_index = -1;
+
+  ui->MainDisplay->updateMeshBuffers( &ui->MainDisplay->Meshes[value] );
 }

@@ -32,7 +32,6 @@ private slots:
   void on_wireFrameCB_toggled(bool checked);   // Wireframe mode on/off
   void on_controlMeshCB_toggled(bool checked); // Show control mesh on/off
   void on_showModelCB_toggled(bool checked);   // Hide model on/off
-  void on_applySharpnessPB_released();         // Functions for setting/applying sharpness
   void on_sharpnessSlider_editingFinished();
 
 private:

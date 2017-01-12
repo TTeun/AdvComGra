@@ -13,21 +13,6 @@
   <property name="windowTitle">
    <string>MainWindow</string>
   </property>
-  <property name="styleSheet">
-   <string notr="true">/* Groupbox */
-
-QGroupBox {
-    border: 1px solid #DDD;
-    border-radius: 9px;
-    margin-top: 9px;
-}
-
-QGroupBox::title {
-    subcontrol-origin: margin;
-    left: 10px;
-    padding: 0 3px 0 3px;
-}</string>
-  </property>
   <widget class="QWidget" name="centralWidget">
    <layout class="QHBoxLayout" name="horizontalLayout">
     <property name="leftMargin">
@@ -55,6 +40,9 @@ QGroupBox::title {
         <width>220</width>
         <height>0</height>
        </size>
+      </property>
+      <property name="styleSheet">
+       <string notr="true"/>
       </property>
       <property name="title">
        <string>Settings</string>
@@ -133,8 +121,8 @@ QGroupBox::title {
       <widget class="QDoubleSpinBox" name="sharpnessSlider">
        <property name="geometry">
         <rect>
-         <x>20</x>
-         <y>490</y>
+         <x>100</x>
+         <y>455</y>
          <width>62</width>
          <height>27</height>
         </rect>
@@ -151,19 +139,6 @@ QGroupBox::title {
        </property>
        <property name="text">
         <string>Sharpness</string>
-       </property>
-      </widget>
-      <widget class="QPushButton" name="applySharpnessPB">
-       <property name="geometry">
-        <rect>
-         <x>95</x>
-         <y>490</y>
-         <width>106</width>
-         <height>27</height>
-        </rect>
-       </property>
-       <property name="text">
-        <string>Apply Sharpness</string>
        </property>
       </widget>
       <widget class="QCheckBox" name="showModelCB">
