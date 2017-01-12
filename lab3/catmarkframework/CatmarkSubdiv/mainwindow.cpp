@@ -93,8 +93,6 @@ void MainWindow::on_sharpnessSlider_editingFinished()
   if (ui->MainDisplay->selected_index >=  ui->MainDisplay->Meshes[0].HalfEdges.size() || (ui->MainDisplay->selected_index <= 0))
     return;
 
-  qDebug() << ui->sharpnessSlider->value();
-
   HalfEdge *currentEdge;
   currentEdge = &ui->MainDisplay->Meshes[0].HalfEdges[ui->MainDisplay->selected_index];
   currentEdge->sharpness = ui->sharpnessSlider->value();

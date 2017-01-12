@@ -150,37 +150,37 @@ void MainView::buildCtrlMesh()
 
 
   qDebug() << max;
-    // Here we build the control mesh which can be viewed over the subdivided mesh of the quad mesh
-    firstPass = false;
+  // Here we build the control mesh which can be viewed over the subdivided mesh of the quad mesh
+  firstPass = false;
 
-    unsigned int k;
-    HalfEdge* currentEdge;
-    ctrlCoords.clear();
-    ctrlColours.clear();
-    ctrlIndices.clear();
+  unsigned int k;
+  HalfEdge* currentEdge;
+  ctrlCoords.clear();
+  ctrlColours.clear();
+  ctrlIndices.clear();
 
-    size_t index = 0;
-    float s;
-    for (k = 0; k <Meshes[0].HalfEdges.size(); k++)
-    {
-        currentEdge = &Meshes[0].HalfEdges[k];
-        if (currentEdge->index < currentEdge->twin->index){
-            ctrlCoords.append(currentEdge->target->coords);
-            ctrlCoords.append(currentEdge->twin->target->coords);
-            s = currentEdge->sharpness;
-            if (s > 0){
-                ctrlColours.append(QVector3D(0.0, 0.0, 1.0));
-                ctrlColours.append(QVector3D(0.0, 0.0, 1.0));
-              } else {
-                ctrlColours.append(QVector3D(0.6, 0.8, 0.0 ));
-                ctrlColours.append(QVector3D(0.6, 0.8, 0.0 ));
-              }
-            ctrlIndices.append(index);
-            ctrlIndices.append(index + 1);
-            index += 2;
-            ctrlIndices.append(maxInt);
-          }
-      }
+  size_t index = 0;
+  float s;
+  for (k = 0; k < (GLuint)Meshes[0].HalfEdges.size(); k++)
+  {
+      currentEdge = &Meshes[0].HalfEdges[k];
+      if (currentEdge->index < currentEdge->twin->index){
+          ctrlCoords.append(currentEdge->target->coords);
+          ctrlCoords.append(currentEdge->twin->target->coords);
+          s = currentEdge->sharpness;
+          if (s > 0){
+              ctrlColours.append(QVector3D(s / 15.0, 1.0 - s / 5.0 - 0.2, s / 5.0 + 0.2));
+              ctrlColours.append(QVector3D(s / 15.0, 1.0 - s / 5.0 - 0.2, s / 5.0 + 0.2));
+            } else {
+              ctrlColours.append(QVector3D(0.6, 0.8, 0.0 ));
+              ctrlColours.append(QVector3D(0.6, 0.8, 0.0 ));
+            }
+          ctrlIndices.append(index);
+          ctrlIndices.append(index + 1);
+          index += 2;
+          ctrlIndices.append(maxInt);
+        }
+    }
 
 
     glBindBuffer(GL_ARRAY_BUFFER, ctrlCoordsBO);
@@ -206,7 +206,6 @@ void MainView::updateMeshBuffers(Mesh *currentMesh) {
 
   if (firstPass)       // First time we go through this function, build the control mesh.
       buildCtrlMesh();
-
 
   vertexCoords.clear();
   vertexCoords.reserve(currentMesh->Vertices.size());

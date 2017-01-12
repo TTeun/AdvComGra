@@ -167,7 +167,7 @@ QVector3D ccVertexPoint(HalfEdge* firstEdge, Mesh* subdivMesh) {
   unsigned short k, n;
   QVector3D sumStarPts, sumFacePts;
   QVector3D vertexPt;
-  float stencilValue;
+
   HalfEdge* currentEdge;
   Vertex* currentVertex;
 
@@ -178,6 +178,20 @@ QVector3D ccVertexPoint(HalfEdge* firstEdge, Mesh* subdivMesh) {
   sumFacePts = QVector3D();
   currentEdge = firstEdge;
 
+  // Catmull-Clark (also supporting initial meshes containing n-gons)
+  if (HalfEdge* boundaryEdge = vertOnBoundary(currentVertex)) {
+    if (boundaryEdge->twin->target->val == 2) {
+      // Interpolate corners
+      vertexPt = boundaryEdge->twin->target->coords;
+    }
+    else {
+      vertexPt  = 1.0 * boundaryEdge->target->coords;
+      vertexPt += 6.0 * boundaryEdge->twin->target->coords;
+      vertexPt += 1.0 * boundaryEdge->prev->twin->target->coords;
+      vertexPt /= 8.0;
+    }
+  }
+  else {
     for (k=0; k<n; k++) {
       sumStarPts += currentEdge->target->coords;
       sumFacePts += subdivMesh->Vertices[currentEdge->polygon->index].coords;
@@ -185,30 +199,25 @@ QVector3D ccVertexPoint(HalfEdge* firstEdge, Mesh* subdivMesh) {
     }
 
     vertexPt = ((n-2)*currentVertex->coords + sumStarPts/n + sumFacePts/n)/n;
-
+  }
 
   return vertexPt;
 
 }
+
 QVector3D vertexPoint(HalfEdge* firstEdge, Mesh* subdivMesh) {
-    // This functions handels vertices with (possibly fractional) sharpness, it is still a mess.
-    // I did not yet spend time making it clearer because it isn't even part of lab3, but I did
-    // it for fun :)
-  unsigned short k, n;
   QVector3D vertexPt = QVector3D(0.0, 0.0, 0.0);
 
   HalfEdge* currentEdge;
   Vertex* currentVertex;
 
   currentVertex = firstEdge->twin->target;
-  n = currentVertex->val;
-
-  currentEdge = firstEdge;
+  unsigned short n = currentVertex->val;
 
   float sharpness = 0.0;
-  int incidentCreases = 0;
+  size_t incidentCreases = 0;
   currentEdge = firstEdge;
-  for (int i = 0; i < n; ++i){
+  for (size_t i = 0; i < n; ++i){
       if (currentEdge->sharpness > 0.0){
           sharpness += currentEdge->sharpness;
           ++incidentCreases;
