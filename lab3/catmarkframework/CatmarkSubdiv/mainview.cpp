@@ -159,7 +159,8 @@ void MainView::buildCtrlMesh()
     ctrlColours.clear();
     ctrlIndices.clear();
 
-    size_t index = 0, s;
+    size_t index = 0;
+    float s;
     for (k = 0; k <Meshes[0].HalfEdges.size(); k++)
     {
         currentEdge = &Meshes[0].HalfEdges[k];
@@ -168,8 +169,8 @@ void MainView::buildCtrlMesh()
             ctrlCoords.append(currentEdge->twin->target->coords);
             s = currentEdge->sharpness;
             if (s > 0){
-                ctrlColours.append(QVector3D(0.6, 0.0, 1 - s / 4.0 ));
-                ctrlColours.append(QVector3D(0.6, 0.0, 1 - s / 4.0 ));
+                ctrlColours.append(QVector3D(0.0, 0.0, 1.0));
+                ctrlColours.append(QVector3D(0.0, 0.0, 1.0));
               } else {
                 ctrlColours.append(QVector3D(0.6, 0.8, 0.0 ));
                 ctrlColours.append(QVector3D(0.6, 0.8, 0.0 ));

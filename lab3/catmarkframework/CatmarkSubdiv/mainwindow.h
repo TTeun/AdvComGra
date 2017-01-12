@@ -30,7 +30,6 @@ private slots:
   void on_ImportOBJ_clicked();                 // Load object
   void on_SubdivSteps_valueChanged(int value); // Change subdivision level
   void on_wireFrameCB_toggled(bool checked);   // Wireframe mode on/off
-  void on_limitPointsCB_toggled(bool checked); // Project to limit on/off
   void on_controlMeshCB_toggled(bool checked); // Show control mesh on/off
   void on_showModelCB_toggled(bool checked);   // Hide model on/off
   void on_applySharpnessPB_released();         // Functions for setting/applying sharpness

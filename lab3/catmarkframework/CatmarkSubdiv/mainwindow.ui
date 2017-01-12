@@ -114,19 +114,6 @@ QGroupBox::title {
         <bool>true</bool>
        </property>
       </widget>
-      <widget class="QCheckBox" name="limitPointsCB">
-       <property name="geometry">
-        <rect>
-         <x>20</x>
-         <y>415</y>
-         <width>87</width>
-         <height>22</height>
-        </rect>
-       </property>
-       <property name="text">
-        <string>To limit</string>
-       </property>
-      </widget>
       <widget class="QCheckBox" name="controlMeshCB">
        <property name="geometry">
         <rect>

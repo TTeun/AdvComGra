@@ -21,7 +21,7 @@ void MainWindow::importOBJ() {
   ui->MainDisplay->Meshes.squeeze();
   ui->MainDisplay->Meshes.append( Mesh(&newModel) );
 
-  ui->ImportOBJ->setEnabled(false);
+//  ui->ImportOBJ->setEnabled(false);
 
   ui->MainDisplay->updateMeshBuffers( &ui->MainDisplay->Meshes[0] );
   ui->MainDisplay->modelLoaded = true;
@@ -46,28 +46,12 @@ void MainWindow::on_SubdivSteps_valueChanged(int value) {
   ui->MainDisplay->currentMeshIndex = value;
 
   ui->MainDisplay->updateMeshBuffers( &ui->MainDisplay->Meshes[value] );
-  ui->limitPointsCB->setChecked(false);
 }
 
 void MainWindow::on_wireFrameCB_toggled(bool checked)
 {
     ui->MainDisplay->wireframeMode = checked;
     ui->MainDisplay->update();
-}
-
-void MainWindow::on_limitPointsCB_toggled(bool checked)
-{
-    ui->MainDisplay->limitShown = checked;
-
-    if (checked){
-        ui->MainDisplay->limitMesh = new Mesh();
-        toLimitMesh(&ui->MainDisplay->Meshes[currentMesh], ui->MainDisplay->limitMesh); // Implementation in meshtools.cpp
-        ui->MainDisplay->updateMeshBuffers( ui->MainDisplay->limitMesh );
-
-    } else {
-        ui->MainDisplay->updateMeshBuffers( &ui->MainDisplay->Meshes[currentMesh] );
-    }
-
 }
 
 void MainWindow::on_controlMeshCB_toggled(bool checked)
@@ -100,7 +84,6 @@ void MainWindow::on_applySharpnessPB_released()
     ui->MainDisplay->selected_index = -1;
 
     ui->MainDisplay->updateMeshBuffers( &ui->MainDisplay->Meshes[value] );
-    ui->limitPointsCB->setChecked(false);
 }
 
 void MainWindow::setSharpness(double value){

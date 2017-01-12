@@ -30,14 +30,12 @@ public:
   float dispRatio;
 
   bool firstPass = true;    // When the model is just loaded, we build the control mesh (only once)
-  bool limitShown = false;  // Project to limit points or not
 
   void updateMatrices();
   void updateUniforms();
   void updateMeshBuffers(Mesh *currentMesh);
 
   QVector<Mesh> Meshes;     // Moved here from the MainWindow class for slightly easier jumpin between meshes
-  Mesh *limitMesh;          // Pointer to limit mesh
 
   // Tessellation level
   float tessLevelInner = 4.0;

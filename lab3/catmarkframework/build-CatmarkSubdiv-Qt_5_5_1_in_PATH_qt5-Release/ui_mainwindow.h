@@ -37,7 +37,6 @@ public:
     QPushButton *ImportOBJ;
     QLabel *StepsLabel;
     QCheckBox *wireFrameCB;
-    QCheckBox *limitPointsCB;
     QCheckBox *controlMeshCB;
     QDoubleSpinBox *sharpnessSlider;
     QLabel *label;
@@ -92,9 +91,6 @@ public:
         wireFrameCB->setObjectName(QStringLiteral("wireFrameCB"));
         wireFrameCB->setGeometry(QRect(30, 120, 87, 22));
         wireFrameCB->setChecked(true);
-        limitPointsCB = new QCheckBox(SettingsGB);
-        limitPointsCB->setObjectName(QStringLiteral("limitPointsCB"));
-        limitPointsCB->setGeometry(QRect(20, 415, 87, 22));
         controlMeshCB = new QCheckBox(SettingsGB);
         controlMeshCB->setObjectName(QStringLiteral("controlMeshCB"));
         controlMeshCB->setGeometry(QRect(30, 150, 131, 22));
@@ -134,7 +130,6 @@ public:
         ImportOBJ->setText(QApplication::translate("MainWindow", "Import OBJ file", 0));
         StepsLabel->setText(QApplication::translate("MainWindow", "Catmull-Clark steps", 0));
         wireFrameCB->setText(QApplication::translate("MainWindow", "Wireframe", 0));
-        limitPointsCB->setText(QApplication::translate("MainWindow", "To limit", 0));
         controlMeshCB->setText(QApplication::translate("MainWindow", "Control Mesh", 0));
         label->setText(QApplication::translate("MainWindow", "Sharpness", 0));
         applySharpnessPB->setText(QApplication::translate("MainWindow", "Apply Sharpness", 0));
