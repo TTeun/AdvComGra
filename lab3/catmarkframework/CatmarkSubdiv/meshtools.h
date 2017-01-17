@@ -10,6 +10,7 @@ void toLimitMesh(Mesh* inputMesh, Mesh *limitMesh); // Project mesh to its limit
 QVector3D vertexPoint(HalfEdge* firstEdge, Mesh *newMesh);
 QVector3D edgePoint(HalfEdge* firstEdge, Mesh* newMesh);
 QVector3D facePoint(HalfEdge* firstEdge);
+float chaiSharpness(HalfEdge *currentEdge);
 
 HalfEdge* vertOnBoundary(Vertex* currentVertex);
 

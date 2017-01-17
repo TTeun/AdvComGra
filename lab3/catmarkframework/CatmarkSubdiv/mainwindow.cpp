@@ -5,7 +5,6 @@ MainWindow::MainWindow(QWidget *parent) :  QMainWindow(parent), ui(new Ui::MainW
   qDebug() << "✓✓ MainWindow constructor";
   ui->setupUi(this);
   ui->MainDisplay->mainWindow = this;
-  setWindowState(windowState() ^ Qt::WindowFullScreen);
 }
 
 MainWindow::~MainWindow() {
@@ -92,7 +91,5 @@ void MainWindow::on_sharpnessSlider_editingFinished()
   }
 
   currentMesh = value;
-//    ui->MainDisplay->selected_index = -1;
-
   ui->MainDisplay->updateMeshBuffers( &ui->MainDisplay->Meshes[value] );
 }

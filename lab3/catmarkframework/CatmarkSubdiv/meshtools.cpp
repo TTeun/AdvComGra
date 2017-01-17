@@ -11,7 +11,7 @@ void subdivideCatmullClark(Mesh* inputMesh, Mesh* subdivMesh) {
   unsigned short n;
   HalfEdge* currentEdge;
 
-  qDebug() << ":: Creating new Catmull-Clark mesh";
+//  qDebug() << ":: Creating new Catmull-Clark mesh";
 
   numVerts = inputMesh->Vertices.size();
   numHalfEdges = inputMesh->HalfEdges.size();
@@ -38,7 +38,7 @@ void subdivideCatmullClark(Mesh* inputMesh, Mesh* subdivMesh) {
                                         k) );
   }
 
-  qDebug() << " * Created face points";
+//  qDebug() << " * Created face points";
 
   vIndex = numFaces;
 
@@ -53,7 +53,7 @@ void subdivideCatmullClark(Mesh* inputMesh, Mesh* subdivMesh) {
     vIndex++;
   }
 
-  qDebug() << " * Created vertex points";
+//  qDebug() << " * Created vertex points";
 
   // Create edge points
   for (k=0; k<numHalfEdges; k++) {
@@ -70,12 +70,12 @@ void subdivideCatmullClark(Mesh* inputMesh, Mesh* subdivMesh) {
     }
   }
 
-  qDebug() << " * Created edge points";
+//  qDebug() << " * Created edge points";
 
   // Split halfedges
   splitHalfEdges(inputMesh, subdivMesh, numHalfEdges, numVerts, numFaces);
 
-  qDebug() << " * Split halfedges";
+//  qDebug() << " * Split halfedges";
 
   hIndex = 2*numHalfEdges;
   fIndex = 0;
@@ -145,22 +145,54 @@ void subdivideCatmullClark(Mesh* inputMesh, Mesh* subdivMesh) {
 
   }
 
-  qDebug() << " * Created faces and remaining halfedges";
+//  qDebug() << " * Created faces and remaining halfedges";
 
   // For vertex points
   for (k=0; k<numVerts; k++) {
     subdivMesh->Vertices[numFaces + k].out = &subdivMesh->HalfEdges[ 2*inputMesh->Vertices[k].out->index ];
   }
 
-  qDebug() << " * Completed!";
-  qDebug() << "   # Vertices:" << subdivMesh->Vertices.size();
-  qDebug() << "   # HalfEdges:" << subdivMesh->HalfEdges.size();
-  qDebug() << "   # Faces:" << subdivMesh->Faces.size();
-
+//  qDebug() << " * Completed!";
+//  qDebug() << "   # Vertices:" << subdivMesh->Vertices.size();
+//  qDebug() << "   # HalfEdges:" << subdivMesh->HalfEdges.size();
+//  qDebug() << "   # Faces:" << subdivMesh->Faces.size();
+  float sharpness;
   for (int i = 0; i < inputMesh->HalfEdges.size(); ++i){
-      subdivMesh->HalfEdges[2 * i].sharpness = max(inputMesh->HalfEdges[i].sharpness - 1.0, 0.0);
-      subdivMesh->HalfEdges[2 * i + 1].sharpness = max(inputMesh->HalfEdges[i].sharpness - 1.0, 0.0);
-  }
+      currentEdge = &inputMesh->HalfEdges[i];
+      if (currentEdge->sharpness){
+          sharpness = chaiSharpness(currentEdge);
+          qDebug() << "sharpness" << sharpness;
+          subdivMesh->HalfEdges[2 * i + 1].sharpness = sharpness;
+          subdivMesh->HalfEdges[2 * i + 1].twin->sharpness = sharpness;
+        }
+    }
+
+}
+
+float chaiSharpness(HalfEdge *currentEdge){
+  // Here we loop over all other edges incident upon currentEdge->target to find out
+  // how sharp the newly created edges should be
+
+  size_t n = currentEdge->target->val;
+  size_t counter = 1;   // How many sharp edges meet at currentEdge->target? One so far
+  float sharpness = currentEdge->sharpness;
+  float otherSharpness; // Store sharpness of other edges, only used if there are exactly
+                        // two sharp incident edges
+
+  for (size_t i = 1; i < n; ++i){
+      currentEdge = currentEdge->next->twin;
+      if (currentEdge->sharpness){
+        ++counter;
+        otherSharpness = currentEdge->sharpness;
+        }
+      if (counter > 2) // currentEdge points to a corner
+        return max(0.0, sharpness - 1);
+    }
+  if (counter == 1)    // // currentEdge points to a dart
+    return max(0.0, sharpness - 1);
+
+  // currentEdge is part of a crease
+  return max(0.0, 0.25 * (3.0 * sharpness + otherSharpness) - 1.0);
 }
 
 QVector3D ccVertexPoint(HalfEdge* firstEdge, Mesh* subdivMesh) {
@@ -182,7 +214,7 @@ QVector3D ccVertexPoint(HalfEdge* firstEdge, Mesh* subdivMesh) {
   if (HalfEdge* boundaryEdge = vertOnBoundary(currentVertex)) {
     if (boundaryEdge->twin->target->val == 2) {
       // Interpolate corners
-      vertexPt = boundaryEdge->twin->target->coords;
+      return boundaryEdge->twin->target->coords;
     }
     else {
       vertexPt  = 1.0 * boundaryEdge->target->coords;
@@ -259,10 +291,10 @@ QVector3D avEdgePoint(HalfEdge *currentEdge){
     return point / 2.0;
 }
 
-QVector3D edgePoint(HalfEdge* firstEdge, Mesh* subdivMesh) {
+QVector3D edgePoint(HalfEdge* edge, Mesh* subdivMesh) {
     // This is for (possibly fractional) sharpness edges, this is nicely cleaned up and factorized
   HalfEdge* currentEdge;
-  currentEdge = firstEdge;
+  currentEdge = edge;
 
   float sharpness = currentEdge->sharpness;
   if (!currentEdge->polygon || !currentEdge->twin->polygon || sharpness > 1.0) // Edge is boundary or sharpness > 1.0
@@ -464,6 +496,6 @@ void toLimitMesh(Mesh* inputMesh, Mesh* limitMesh){
 
     for (i = 0; i < numFaces; ++i)
         limitMesh->Faces[i].side = &limitMesh->HalfEdges[inputMesh->Faces[i].side->index];
-    qDebug() << "Limit points constructed";
+//    qDebug() << "Limit points constructed";
 }
 

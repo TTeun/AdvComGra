@@ -328,14 +328,11 @@ void MainView::initializeGL() {
   maxInt = ((unsigned int) -1);
   glPrimitiveRestartIndex(maxInt);
 
-
   // This is nice for thickening the lines to make figures
   glEnable(GL_LINE_SMOOTH);
   glLineWidth(0.5);
   glEnable(GL_BLEND);
   glHint(GL_LINE_SMOOTH_HINT, GL_NICEST);
-
-
 
   createShaderPrograms();
   createBuffers();
@@ -382,12 +379,10 @@ void MainView::paintGL() {
             glDrawElements(GL_TRIANGLE_FAN, meshIBOSize, GL_UNSIGNED_INT, 0);
         }
         mainShaderProg->release();
-
     }
 
     if (showControlMesh)
     {
-
         controlMeshShader->bind();
         glBindVertexArray(ctrlVAO);
         glDrawElements(GL_LINES, ctrlIndices.size(), GL_UNSIGNED_INT, 0);
@@ -472,7 +467,6 @@ void MainView::mousePressEvent(QMouseEvent* event) {
       if (selected_index > -1)
         mainWindow->setSharpness(Meshes[0].HalfEdges[selected_index].sharpness); // Upload this sharpness to the GUI
 
-      qDebug() << "asdasddsasa";
       updateMatrices();
 
       slctCoords.clear();
