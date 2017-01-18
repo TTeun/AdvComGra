@@ -47,9 +47,11 @@ void subdivideCatmullClark(Mesh* inputMesh, Mesh* subdivMesh) {
     n = inputMesh->Vertices[k].val;
     // Coords (x,y,z), Out, Valence, Index
     float sharp=0;
+    //Check if a vertex has a sharpness assigned to it
     if(inputMesh->Vertices[k].out->twin->target->sharpness>0){
         sharp = std::max(inputMesh->Vertices[k].out->twin->target->sharpness-1,0);
     }
+
     subdivMesh->Vertices.append( Vertex(vertexPoint(inputMesh->Vertices[k].out, subdivMesh),
                                         nullptr,
                                         n,
@@ -255,16 +257,11 @@ QVector3D vertexPoint(HalfEdge* firstEdge, Mesh* subdivMesh) {
   currentEdge = firstEdge;
 
   if(currentVertex->sharpness>0){
-      //currentVertex->sharpness = currentVertex->sharpness-1.0;
+      //Sharp vertex case
       if (currentVertex->sharpness >= 3) // Vertex is a corner
           return currentVertex->coords;
-      if(currentVertex->sharpness==2){
-          vertexPt += 6.0 * currentVertex->coords;
-          vertexPt /= 8.0;
-          return vertexPt;
-      }
   }else{
-
+    //Normal vertex case
   for (size_t i = 0; i < n; ++i){
       if (currentEdge->sharpness > 0.0){
           sharpness += currentEdge->sharpness;

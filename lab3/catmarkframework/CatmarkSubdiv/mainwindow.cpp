@@ -65,6 +65,18 @@ void MainWindow::on_showModelCB_toggled(bool checked)
     ui->MainDisplay->update();
 }
 
+void MainWindow::on_relfCheckBox_toggled(bool checked)
+{
+    ui->MainDisplay->useReflLines = checked;
+    qDebug()<<"Refl toogled";
+    ui->MainDisplay->update();
+}
+void MainWindow::on_reflDensitySlider_valueChanged(int value)
+{ // Change the reflection line density
+    ui->MainDisplay->reflectionDensity = (float)value;
+    ui->MainDisplay->update();
+}
+
 void MainWindow::setSharpness(double value){
     ui->sharpnessSlider->setValue(value);
 }
@@ -75,12 +87,14 @@ void MainWindow::on_sharpnessSlider_editingFinished()
     return;
 
   if(ui->MainDisplay->selected_index_vert>-1){
+      //Setting the sharpness for a selected vertex
       Vertex *selectedVertex;
       selectedVertex = &ui->MainDisplay->Meshes[0].Vertices[ui->MainDisplay->selected_index_vert];
       selectedVertex->sharpness = ui->sharpnessSlider->value();
       qDebug()<<"Sharpness:";
       qDebug()<< selectedVertex->sharpness;
   }else{
+      //Setting the sharpness for a selected edge
   HalfEdge *currentEdge;
   currentEdge = &ui->MainDisplay->Meshes[0].HalfEdges[ui->MainDisplay->selected_index];
   currentEdge->sharpness = ui->sharpnessSlider->value();

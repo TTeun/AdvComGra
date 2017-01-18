@@ -9,5 +9,6 @@
         <file>shaders/tess_fragshader.glsl</file>
         <file>shaders/ctrl_vertshader.glsl</file>
         <file>shaders/tess_geomshader.glsl</file>
+        <file>shaders/reflshader.glsl</file>
     </qresource>
 </RCC>

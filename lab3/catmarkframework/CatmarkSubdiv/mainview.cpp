@@ -53,6 +53,13 @@ void MainView::createShaderPrograms() {
 
   controlMeshShader->link();
 
+  //Shader for reflection lines
+  reflShaderProg = new QOpenGLShaderProgram();
+  reflShaderProg->addShaderFromSourceFile(QOpenGLShader::Vertex, ":/shaders/vertshader.glsl");
+  reflShaderProg->addShaderFromSourceFile(QOpenGLShader::Fragment, ":/shaders/reflshader.glsl");
+
+  reflShaderProg->link();
+
   // Collect uniforms
   uniModelViewMatrix = glGetUniformLocation(mainShaderProg->programId(), "modelviewmatrix");
   uniProjectionMatrix = glGetUniformLocation(mainShaderProg->programId(), "projectionmatrix");
@@ -61,6 +68,11 @@ void MainView::createShaderPrograms() {
   ctrlUniModelViewMatrix = glGetUniformLocation(controlMeshShader->programId(), "modelviewmatrix");
   ctrlUniProjectionMatrix = glGetUniformLocation(controlMeshShader->programId(), "projectionmatrix");
   ctrlUniNormalMatrix = glGetUniformLocation(controlMeshShader->programId(), "normalmatrix");
+
+  uniModelViewMatrixRefl = glGetUniformLocation(reflShaderProg->programId(), "modelviewmatrix");
+  uniProjectionMatrixRefl = glGetUniformLocation(reflShaderProg->programId(), "projectionmatrix");
+  uniNormalMatrixRefl = glGetUniformLocation(reflShaderProg->programId(), "normalmatrix");
+  uniReflDensity = glGetUniformLocation(reflShaderProg->programId(), "refldensity");
 
 }
 
@@ -299,6 +311,16 @@ void MainView::updateUniforms() {
         glUniformMatrix3fv(ctrlUniNormalMatrix, 1, false, normalMatrix.data());
         controlMeshShader->release();
     }
+    if(useReflLines){
+        reflShaderProg->bind();
+        glUniformMatrix4fv(uniProjectionMatrixRefl, 1, false, projectionMatrix.data());
+        glUniformMatrix4fv(uniModelViewMatrixRefl, 1, false, modelViewMatrix.data());
+        glUniformMatrix3fv(uniNormalMatrixRefl, 1, false, normalMatrix.data());
+        glUniform1f(uniReflDensity, reflectionDensity);
+
+        qDebug()<<reflectionDensity;
+        reflShaderProg->release();
+    }
 }
 
 void MainView::initializeGL() {
@@ -368,7 +390,12 @@ void MainView::paintGL() {
 
     if (showModel)
     {
-
+        if(useReflLines){
+            glBindVertexArray(meshVAO);
+            reflShaderProg->bind();
+            glDrawElements(GL_TRIANGLE_FAN, meshIBOSize, GL_UNSIGNED_INT, 0);
+            reflShaderProg->release();
+        }else{
         glBindVertexArray(meshVAO);
         mainShaderProg->bind();
         if (wireframeMode) {
@@ -379,6 +406,7 @@ void MainView::paintGL() {
             glDrawElements(GL_TRIANGLE_FAN, meshIBOSize, GL_UNSIGNED_INT, 0);
         }
         mainShaderProg->release();
+        }
     }
 
     if (showControlMesh)
@@ -440,7 +468,7 @@ void MainView::mousePressEvent(QMouseEvent* event) {
       float s;
       HalfEdge *currentEdge;
       Vertex *currentVert;
-
+      //Check if click is close enough to one of the vertexes to select it
       for( int i=0;i<Meshes[0].Vertices.size();i++){
           currentVert = &Meshes[0].Vertices[i];
 
@@ -453,7 +481,7 @@ void MainView::mousePressEvent(QMouseEvent* event) {
           p1 = currentVert->coords;
 
           s = QVector3D::dotProduct((p2 - p1), n2) / QVector3D::dotProduct(d1, n2);
-          if ((s < 0) || (s > 1)) // Here, we click beyond the end of the line, so we do not select it
+          if ((s < 0) || (s > 1))
               distVert = 1000.0;
           else {
               distVert = QVector3D::dotProduct(n, (p2 - p1));
@@ -502,8 +530,9 @@ void MainView::mousePressEvent(QMouseEvent* event) {
       slctCoords.clear();
       slctCoords.squeeze();
 
-      // Update coordinates of the selected edge points
-      if(minDistVert>0.05){
+
+      if(minDistVert>0.08){
+          // Update coordinates of the selected edge points
           //Edge selection case
           selected_index_vert =-1;
           slctCoords.append(Meshes[0].HalfEdges[selected_index].target->coords);
@@ -520,7 +549,6 @@ void MainView::mousePressEvent(QMouseEvent* event) {
           QVector3D offset= QVector3D(0.015,0.015,0.015);
           QVector3D offset2= QVector3D(0.015,-0.015,0.015);
           QVector3D offset3= QVector3D(0.015,0.015,-0.015);
-          //slctCoords.append(Meshes[0].Vertices[minIndexVert].coords);
           slctCoords.append(Meshes[0].Vertices[minIndexVert].coords+ offset);
           slctCoords.append(Meshes[0].Vertices[minIndexVert].coords- offset);
           slctCoords.append(Meshes[0].Vertices[minIndexVert].coords+ offset2);

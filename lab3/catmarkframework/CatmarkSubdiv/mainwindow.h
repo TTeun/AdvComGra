@@ -32,6 +32,8 @@ private slots:
   void on_wireFrameCB_toggled(bool checked);   // Wireframe mode on/off
   void on_controlMeshCB_toggled(bool checked); // Show control mesh on/off
   void on_showModelCB_toggled(bool checked);   // Hide model on/off
+  void on_relfCheckBox_toggled(bool checked);  //Toggle reflection lines
+  void on_reflDensitySlider_valueChanged(int value); //Set reflectin line density
   void on_sharpnessSlider_editingFinished();
 
 private:

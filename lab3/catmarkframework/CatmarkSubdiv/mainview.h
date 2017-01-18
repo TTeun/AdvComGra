@@ -43,6 +43,8 @@ public:
 
   bool showModel = true; // To hide model, can be useful when setting sharpness on the control mesh
 
+  bool useReflLines = false;
+  float reflectionDensity = 10.0;
   // This if setting the sharpness
   void *setSharpnessSlider(double sharpness);
   int selected_index = -1;
@@ -70,13 +72,13 @@ private:
   QMatrix3x3 normalMatrix;
 
   // Uniforms
-  GLint uniModelViewMatrix, uniProjectionMatrix, uniNormalMatrix;
-  GLint ctrlUniModelViewMatrix, ctrlUniProjectionMatrix, ctrlUniNormalMatrix;
+  GLint uniModelViewMatrix, uniProjectionMatrix, uniNormalMatrix, uniModelViewMatrixRefl, uniProjectionMatrixRefl,uniNormalMatrixRefl;
+  GLint ctrlUniModelViewMatrix, ctrlUniProjectionMatrix, ctrlUniNormalMatrix,uniReflDensity;
   GLint uniShowGridLines;
 
   // ---
 
-  QOpenGLShaderProgram* mainShaderProg, *controlMeshShader;
+  QOpenGLShaderProgram* mainShaderProg, *controlMeshShader, *reflShaderProg;
 
   GLuint meshVAO, meshCoordsBO, meshNormalsBO, meshIndexBO;
   GLuint ctrlVAO, ctrlCoordsBO, ctrlIndexBO, ctrlColourBO;

@@ -157,6 +157,45 @@
         <bool>true</bool>
        </property>
       </widget>
+      <widget class="QSlider" name="reflDensitySlider">
+       <property name="geometry">
+        <rect>
+         <x>20</x>
+         <y>310</y>
+         <width>160</width>
+         <height>22</height>
+        </rect>
+       </property>
+       <property name="orientation">
+        <enum>Qt::Horizontal</enum>
+       </property>
+      </widget>
+      <widget class="QLabel" name="label_2">
+       <property name="geometry">
+        <rect>
+         <x>20</x>
+         <y>290</y>
+         <width>131</width>
+         <height>16</height>
+        </rect>
+       </property>
+       <property name="text">
+        <string>Reflection line density</string>
+       </property>
+      </widget>
+      <widget class="QCheckBox" name="relfCheckBox">
+       <property name="geometry">
+        <rect>
+         <x>30</x>
+         <y>180</y>
+         <width>121</width>
+         <height>20</height>
+        </rect>
+       </property>
+       <property name="text">
+        <string>Reflection lines</string>
+       </property>
+      </widget>
      </widget>
     </item>
     <item>
