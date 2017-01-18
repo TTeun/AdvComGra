@@ -34,3 +34,10 @@ RESOURCES += \
     resources.qrc
 
 CONFIG += c++11
+
+DISTFILES += \
+    shaders/ctrl_fragshader.glsl \
+    shaders/ctrl_vertshader.glsl \
+    shaders/fragshader.glsl \
+    shaders/reflshader.glsl \
+    shaders/vertshader.glsl

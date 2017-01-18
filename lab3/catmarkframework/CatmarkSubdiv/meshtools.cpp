@@ -11,7 +11,7 @@ void subdivideCatmullClark(Mesh* inputMesh, Mesh* subdivMesh) {
   unsigned short n;
   HalfEdge* currentEdge;
 
-//  qDebug() << ":: Creating new Catmull-Clark mesh";
+  qDebug() << ":: Creating new Catmull-Clark mesh";
 
   numVerts = inputMesh->Vertices.size();
   numHalfEdges = inputMesh->HalfEdges.size();
@@ -38,28 +38,36 @@ void subdivideCatmullClark(Mesh* inputMesh, Mesh* subdivMesh) {
                                         k) );
   }
 
-//  qDebug() << " * Created face points";
+  qDebug() << " * Created face points";
 
   vIndex = numFaces;
 
   // Create vertex points
+  float sharp;
   for (k=0; k<numVerts; k++) {
     n = inputMesh->Vertices[k].val;
     // Coords (x,y,z), Out, Valence, Index
+<<<<<<< HEAD
     float sharp=0;
     //Check if a vertex has a sharpness assigned to it
     if(inputMesh->Vertices[k].out->twin->target->sharpness>0){
         sharp = std::max(inputMesh->Vertices[k].out->twin->target->sharpness-1,0);
     }
+=======
+    sharp = 0.0;
+    if(inputMesh->Vertices[k].sharpness)
+        sharp = max(inputMesh->Vertices[k].sharpness-1,0); // Create new vertex that is less sharp
+>>>>>>> 425e72cd0736a0fad6cf7188bdccef8cde57260c
 
     subdivMesh->Vertices.append( Vertex(vertexPoint(inputMesh->Vertices[k].out, subdivMesh),
                                         nullptr,
                                         n,
-                                        vIndex,sharp) );
+                                        vIndex,
+                                        sharp) );
     vIndex++;
   }
 
-//  qDebug() << " * Created vertex points";
+  qDebug() << " * Created vertex points";
 
   // Create edge points
   for (k=0; k<numHalfEdges; k++) {
@@ -76,12 +84,12 @@ void subdivideCatmullClark(Mesh* inputMesh, Mesh* subdivMesh) {
     }
   }
 
-//  qDebug() << " * Created edge points";
+  qDebug() << " * Created edge points";
 
   // Split halfedges
   splitHalfEdges(inputMesh, subdivMesh, numHalfEdges, numVerts, numFaces);
 
-//  qDebug() << " * Split halfedges";
+  qDebug() << " * Split halfedges";
 
   hIndex = 2*numHalfEdges;
   fIndex = 0;
@@ -158,10 +166,12 @@ void subdivideCatmullClark(Mesh* inputMesh, Mesh* subdivMesh) {
     subdivMesh->Vertices[numFaces + k].out = &subdivMesh->HalfEdges[ 2*inputMesh->Vertices[k].out->index ];
   }
 
-//  qDebug() << " * Completed!";
-//  qDebug() << "   # Vertices:" << subdivMesh->Vertices.size();
-//  qDebug() << "   # HalfEdges:" << subdivMesh->HalfEdges.size();
-//  qDebug() << "   # Faces:" << subdivMesh->Faces.size();
+  qDebug() << " * Completed!";
+  qDebug() << "   # Vertices:" << subdivMesh->Vertices.size();
+  qDebug() << "   # HalfEdges:" << subdivMesh->HalfEdges.size();
+  qDebug() << "   # Faces:" << subdivMesh->Faces.size();
+
+  // Here we have a loop that does the sharpness smoothing
   float sharpness;
   for (int i = 0; i < inputMesh->HalfEdges.size(); ++i){
       currentEdge = &inputMesh->HalfEdges[i];
@@ -202,6 +212,7 @@ float chaiSharpness(HalfEdge *currentEdge){
 }
 
 QVector3D ccVertexPoint(HalfEdge* firstEdge, Mesh* subdivMesh) {
+  // The standard CC new vertex position function
   unsigned short k, n;
   QVector3D sumStarPts, sumFacePts;
   QVector3D vertexPt;
@@ -244,30 +255,37 @@ QVector3D ccVertexPoint(HalfEdge* firstEdge, Mesh* subdivMesh) {
 }
 
 QVector3D vertexPoint(HalfEdge* firstEdge, Mesh* subdivMesh) {
-  QVector3D vertexPt = QVector3D(0.0, 0.0, 0.0);
 
-  HalfEdge* currentEdge;
   Vertex* currentVertex;
-
   currentVertex = firstEdge->twin->target;
+
+  if(currentVertex->sharpness) //  Vertex is tagged as sharp
+    return currentVertex->coords;
+
+  QVector3D vertexPt = QVector3D(0.0, 0.0, 0.0);
+  HalfEdge* currentEdge;
+
   unsigned short n = currentVertex->val;
 
   float sharpness = 0.0;
   size_t incidentCreases = 0;
   currentEdge = firstEdge;
 
+<<<<<<< HEAD
   if(currentVertex->sharpness>0){
       //Sharp vertex case
       if (currentVertex->sharpness >= 3) // Vertex is a corner
           return currentVertex->coords;
   }else{
     //Normal vertex case
+=======
+
+>>>>>>> 425e72cd0736a0fad6cf7188bdccef8cde57260c
   for (size_t i = 0; i < n; ++i){
       if (currentEdge->sharpness > 0.0){
           sharpness += currentEdge->sharpness;
           ++incidentCreases;
           vertexPt += ccVertexPoint(currentEdge, subdivMesh);
-
       }
       currentEdge = currentEdge->prev->twin;
   }
@@ -287,11 +305,13 @@ QVector3D vertexPoint(HalfEdge* firstEdge, Mesh* subdivMesh) {
       }
       return vertexPt;
   }
-  }
+
+  // return smooth vertex position as incidentCreases < 2
   return ccVertexPoint(currentEdge, subdivMesh);
 }
 
 QVector3D ccEdgePoint(HalfEdge *currentEdge, Mesh *subdivMesh){
+  // smooth CC edge point position
     QVector3D point;
     point  = currentEdge->target->coords;
     point += currentEdge->twin->target->coords;
@@ -301,6 +321,7 @@ QVector3D ccEdgePoint(HalfEdge *currentEdge, Mesh *subdivMesh){
 }
 
 QVector3D avEdgePoint(HalfEdge *currentEdge){
+  // boundary of sharp rule for edge point
     QVector3D point;
     point = currentEdge->target->coords;
     point += currentEdge->twin->target->coords;
@@ -308,7 +329,6 @@ QVector3D avEdgePoint(HalfEdge *currentEdge){
 }
 
 QVector3D edgePoint(HalfEdge* edge, Mesh* subdivMesh) {
-    // This is for (possibly fractional) sharpness edges, this is nicely cleaned up and factorized
   HalfEdge* currentEdge;
   currentEdge = edge;
 
@@ -442,76 +462,3 @@ QVector3D faceAverage(Face* inputFace){
     }
     return average / n;
 }
-
-void toLimitMesh(Mesh* inputMesh, Mesh* limitMesh){
-    limitMesh->Vertices.reserve(inputMesh->Vertices.size());
-    limitMesh->Faces.reserve(inputMesh->Faces.size());
-    limitMesh->HalfEdges.reserve(inputMesh->HalfEdges.size());
-
-    size_t i;
-    size_t n;
-    float c;
-
-    size_t numVerts     = inputMesh->Vertices.size();
-    size_t numHalfEdges = inputMesh->HalfEdges.size();
-    size_t numFaces     = inputMesh->Faces.size();
-
-    Vertex* currentVertex;
-    Vertex limitVertex;
-    HalfEdge* currentEdge;
-    QVector3D coords;
-    for (i = 0; i < numVerts; ++i){
-        currentVertex = &inputMesh->Vertices[i];
-        n = currentVertex->val;
-
-        // Deep copy the values so we do not accidentally alter inputMesh
-        limitVertex.val = n;
-        limitVertex.index = i;
-        limitVertex.sharpness = currentVertex->sharpness;
-
-        currentEdge = currentVertex->out;
-
-        if (HalfEdge* boundaryEdge = vertOnBoundary(currentVertex)) {
-            limitVertex.coords = boundaryEdge->target->coords;
-            limitVertex.coords += 4.0 * boundaryEdge->prev->target->coords;
-            limitVertex.coords += boundaryEdge->prev->twin->target->coords;
-            limitVertex.coords /= 6.0;
-        }
-        else
-        {
-            coords = currentVertex->coords;
-
-            // "Approximating Subdivision Surfaces with Gregory Patches for Hardware Tessellation" by Charles Loop Et Al.
-            limitVertex.coords = (n - 3) * coords / ((float) (n + 5));
-            c = 4 / ((float)(n * (n + 5)));
-            for (size_t k = 0; k < n; ++k){
-                limitVertex.coords += 0.5 * c * (coords + currentEdge->target->coords);
-                limitVertex.coords += c * faceAverage(currentEdge->polygon);
-                currentEdge = currentEdge->prev->twin;
-            }
-        }
-        limitMesh->Vertices.append(limitVertex);
-    }
-
-    // The next section simply deep copies the topological connectivity from inputMesh
-    for (i = 0; i < numHalfEdges; ++i)
-        limitMesh->HalfEdges.append(inputMesh->HalfEdges[i]);
-
-    for (i = 0; i < numVerts; ++i)
-        limitMesh->Vertices[i].out = &limitMesh->HalfEdges[inputMesh->Vertices[i].out->index];
-
-    for (i = 0; i < numHalfEdges; ++i){
-        limitMesh->HalfEdges[i].target = &limitMesh->Vertices[inputMesh->HalfEdges[i].target->index];
-        limitMesh->HalfEdges[i].next = &limitMesh->HalfEdges[inputMesh->HalfEdges[i].next->index];
-        limitMesh->HalfEdges[i].prev = &limitMesh->HalfEdges[inputMesh->HalfEdges[i].prev->index];
-        limitMesh->HalfEdges[i].twin = &limitMesh->HalfEdges[inputMesh->HalfEdges[i].twin->index];
-    }
-
-    for (i = 0; i < numFaces; ++i)
-        limitMesh->Faces.append(inputMesh->Faces[i]);
-
-    for (i = 0; i < numFaces; ++i)
-        limitMesh->Faces[i].side = &limitMesh->HalfEdges[inputMesh->Faces[i].side->index];
-//    qDebug() << "Limit points constructed";
-}
-

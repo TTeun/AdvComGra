@@ -140,7 +140,11 @@ void MainView::createBuffers() {
 
 void MainView::buildCtrlMesh()
 {
-  QVector3D av;
+  // Here we fill the buffers to show the control mesh: Meshes[0]
+
+  // Some meshes of the internet did not fit nicely, so here we first adapt the mesh to be
+  // contained the unit ball centered at the origin
+  QVector3D av; // Average position or vertices
   for (int i = 0; i < Meshes[0].Vertices.size(); ++i){
       av += Meshes[0].Vertices[i].coords;
     }
@@ -148,7 +152,7 @@ void MainView::buildCtrlMesh()
   qDebug() << "Average" << av << '\n';
 
   for (int i = 0; i < Meshes[0].Vertices.size(); ++i){
-      Meshes[0].Vertices[i].coords -= av;
+      Meshes[0].Vertices[i].coords -= av; // To put center of mass at the origin
     }
 
   float max = 0;
@@ -157,13 +161,12 @@ void MainView::buildCtrlMesh()
     }
 
   for (int i = 0; i < Meshes[0].Vertices.size(); ++i){
-      Meshes[0].Vertices[i].coords /= max;
+      Meshes[0].Vertices[i].coords /= max; // To shrink mesh to within unit ball
     }
 
 
   qDebug() << max;
   // Here we build the control mesh which can be viewed over the subdivided mesh of the quad mesh
-  firstPass = false;
 
   unsigned int k;
   HalfEdge* currentEdge;
@@ -181,7 +184,7 @@ void MainView::buildCtrlMesh()
           ctrlCoords.append(currentEdge->twin->target->coords);
           s = currentEdge->sharpness;
           if (s > 0){
-              ctrlColours.append(QVector3D(s / 15.0, 1.0 - s / 5.0 - 0.2, s / 5.0 + 0.2));
+              ctrlColours.append(QVector3D(s / 15.0, 1.0 - s / 5.0 - 0.2, s / 5.0 + 0.2)); // Sharp edges coloured by their sharpness
               ctrlColours.append(QVector3D(s / 15.0, 1.0 - s / 5.0 - 0.2, s / 5.0 + 0.2));
             } else {
               ctrlColours.append(QVector3D(0.6, 0.8, 0.0 ));
@@ -195,6 +198,7 @@ void MainView::buildCtrlMesh()
     }
 
 
+  // bind the buffers
     glBindBuffer(GL_ARRAY_BUFFER, ctrlCoordsBO);
     glBufferData(GL_ARRAY_BUFFER, sizeof(QVector3D)*ctrlCoords.size(), ctrlCoords.data(), GL_DYNAMIC_DRAW);
 
@@ -211,13 +215,12 @@ void MainView::buildCtrlMesh()
 void MainView::updateMeshBuffers(Mesh *currentMesh) {
 
   qDebug() << ".. updateBuffers";
+  buildCtrlMesh();
 
   unsigned int k;
   unsigned short n, m;
   HalfEdge* currentEdge;
 
-  if (firstPass)       // First time we go through this function, build the control mesh.
-      buildCtrlMesh();
 
   vertexCoords.clear();
   vertexCoords.reserve(currentMesh->Vertices.size());
@@ -350,7 +353,7 @@ void MainView::initializeGL() {
   maxInt = ((unsigned int) -1);
   glPrimitiveRestartIndex(maxInt);
 
-  // This is nice for thickening the lines to make figures
+  // This is nice for thickening the lines to show up better
   glEnable(GL_LINE_SMOOTH);
   glLineWidth(0.5);
   glEnable(GL_BLEND);
@@ -390,12 +393,14 @@ void MainView::paintGL() {
 
     if (showModel)
     {
+
         if(useReflLines){
             glBindVertexArray(meshVAO);
             reflShaderProg->bind();
             glDrawElements(GL_TRIANGLE_FAN, meshIBOSize, GL_UNSIGNED_INT, 0);
             reflShaderProg->release();
         }else{
+
         glBindVertexArray(meshVAO);
         mainShaderProg->bind();
         if (wireframeMode) {
@@ -531,8 +536,12 @@ void MainView::mousePressEvent(QMouseEvent* event) {
       slctCoords.squeeze();
 
 
-      if(minDistVert>0.08){
+
+
           // Update coordinates of the selected edge points
+
+      if (minDistVert>0.05){
+
           //Edge selection case
           selected_index_vert =-1;
           slctCoords.append(Meshes[0].HalfEdges[selected_index].target->coords);
@@ -543,12 +552,15 @@ void MainView::mousePressEvent(QMouseEvent* event) {
           glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(unsigned int)*slctlIndices.size(), slctlIndices.data(), GL_DYNAMIC_DRAW);
           glBindBuffer(GL_ARRAY_BUFFER, slctColourBO);
           glBufferData(GL_ARRAY_BUFFER, sizeof(QVector3D)*slctColours.size(), slctColours.data(), GL_DYNAMIC_DRAW);
-      }else{
+      } else {
           //Vertex selection case
           selected_index_vert = minIndexVert;
           QVector3D offset= QVector3D(0.015,0.015,0.015);
           QVector3D offset2= QVector3D(0.015,-0.015,0.015);
           QVector3D offset3= QVector3D(0.015,0.015,-0.015);
+
+          // Here we build the small cross to show the selected vertex
+
           slctCoords.append(Meshes[0].Vertices[minIndexVert].coords+ offset);
           slctCoords.append(Meshes[0].Vertices[minIndexVert].coords- offset);
           slctCoords.append(Meshes[0].Vertices[minIndexVert].coords+ offset2);
@@ -561,11 +573,6 @@ void MainView::mousePressEvent(QMouseEvent* event) {
           glBindBuffer(GL_ARRAY_BUFFER, slctColourBO);
           glBufferData(GL_ARRAY_BUFFER, sizeof(QVector3D)*slctColoursVert.size(), slctColoursVert.data(), GL_DYNAMIC_DRAW);
       }
-
-      //glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, slctIndexBO);
-      //glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(unsigned int)*slctlIndices.size(), slctlIndices.data(), GL_DYNAMIC_DRAW);
-
-
 
       qDebug()<< slctlIndices;
       qDebug()<<slctlIndices.size();

@@ -24,7 +24,6 @@ public:
   Ui::MainWindow *ui;
   void setSharpness(double value);
 private:
-  unsigned int currentMesh = 0;
 
 private slots:
   void on_ImportOBJ_clicked();                 // Load object
@@ -32,9 +31,13 @@ private slots:
   void on_wireFrameCB_toggled(bool checked);   // Wireframe mode on/off
   void on_controlMeshCB_toggled(bool checked); // Show control mesh on/off
   void on_showModelCB_toggled(bool checked);   // Hide model on/off
+<<<<<<< HEAD
   void on_relfCheckBox_toggled(bool checked);  //Toggle reflection lines
   void on_reflDensitySlider_valueChanged(int value); //Set reflectin line density
   void on_sharpnessSlider_editingFinished();
+=======
+  void on_sharpnessSlider_editingFinished();   // Sharpness updated
+>>>>>>> 425e72cd0736a0fad6cf7188bdccef8cde57260c
 
 private:
 };
