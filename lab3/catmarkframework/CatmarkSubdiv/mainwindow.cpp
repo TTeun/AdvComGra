@@ -30,7 +30,6 @@ void MainWindow::importOBJ() {
 }
 
 void MainWindow::on_ImportOBJ_clicked() {
-  ui->MainDisplay->firstPass = true;
   importOBJ();
   ui->SubdivSteps->setEnabled(true);
 }
@@ -42,7 +41,6 @@ void MainWindow::on_SubdivSteps_valueChanged(int value) {
     ui->MainDisplay->Meshes.append(Mesh());
     subdivideCatmullClark(&ui->MainDisplay->Meshes[k-1], &ui->MainDisplay->Meshes[k]);
   }
-  currentMesh = value;
 
   ui->MainDisplay->updateMeshBuffers( &ui->MainDisplay->Meshes[value] );
 }
@@ -71,32 +69,27 @@ void MainWindow::setSharpness(double value){
 
 void MainWindow::on_sharpnessSlider_editingFinished()
 {
-  if (ui->MainDisplay->selected_index >=  ui->MainDisplay->Meshes[0].HalfEdges.size() || (ui->MainDisplay->selected_index <= 0))
-    return;
+  // Once user is done editing the sharpness, we need to send this sharpness to edge or vertex
+  int vertIndex = ui->MainDisplay->selected_index_vert;
+  int edgeIndex = ui->MainDisplay->selected_index;
 
-  if(ui->MainDisplay->selected_index_vert>-1){
+  if (vertIndex > -1){ // A vertex was selected when editing sharpness
       Vertex *selectedVertex;
-      selectedVertex = &ui->MainDisplay->Meshes[0].Vertices[ui->MainDisplay->selected_index_vert];
+      selectedVertex = &ui->MainDisplay->Meshes[0].Vertices[vertIndex]; // Set sharpness of vertex
       selectedVertex->sharpness = ui->sharpnessSlider->value();
-      qDebug()<<"Sharpness:";
-      qDebug()<< selectedVertex->sharpness;
-  }else{
-  HalfEdge *currentEdge;
-  currentEdge = &ui->MainDisplay->Meshes[0].HalfEdges[ui->MainDisplay->selected_index];
-  currentEdge->sharpness = ui->sharpnessSlider->value();
-  currentEdge->twin->sharpness = currentEdge->sharpness;
-    }
+  } else if (edgeIndex > -1){ // An edge was selected
+      HalfEdge *currentEdge;
+      currentEdge = &ui->MainDisplay->Meshes[0].HalfEdges[edgeIndex];
+      currentEdge->sharpness = ui->sharpnessSlider->value();
+      currentEdge->twin->sharpness = currentEdge->sharpness;
+  }
+
   ui->MainDisplay->buildCtrlMesh();
+
+  // We now have to redo the subdivision
   ui->MainDisplay->Meshes.resize(1);
   ui->MainDisplay->Meshes.squeeze();
 
-  unsigned short k;
   int value = ui->SubdivSteps->value();
-  for (k=ui->MainDisplay->Meshes.size(); k<value+1; k++) {
-    ui->MainDisplay->Meshes.append(Mesh());
-    subdivideCatmullClark(&ui->MainDisplay->Meshes[k-1], &ui->MainDisplay->Meshes[k]);
-  }
-
-  currentMesh = value;
-  ui->MainDisplay->updateMeshBuffers( &ui->MainDisplay->Meshes[value] );
+  on_SubdivSteps_valueChanged(value);
 }

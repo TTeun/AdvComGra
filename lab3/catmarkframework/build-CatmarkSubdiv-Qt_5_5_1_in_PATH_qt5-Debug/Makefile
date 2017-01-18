@@ -333,14 +333,9 @@ compiler_rcc_clean:
 	-$(DEL_FILE) qrc_resources.cpp
 qrc_resources.cpp: ../CatmarkSubdiv/resources.qrc \
 		../CatmarkSubdiv/shaders/fragshader.glsl \
-		../CatmarkSubdiv/shaders/tess_fragshader.glsl \
 		../CatmarkSubdiv/shaders/ctrl_vertshader.glsl \
 		../CatmarkSubdiv/shaders/vertshader.glsl \
-		../CatmarkSubdiv/shaders/tess_vertshader.glsl \
-		../CatmarkSubdiv/shaders/tess_geomshader.glsl \
-		../CatmarkSubdiv/shaders/ctrl_fragshader.glsl \
-		../CatmarkSubdiv/shaders/tess_evalshader.glsl \
-		../CatmarkSubdiv/shaders/tess_ctrlshader.glsl
+		../CatmarkSubdiv/shaders/ctrl_fragshader.glsl
 	/usr/lib/x86_64-linux-gnu/qt5/bin/rcc -name resources ../CatmarkSubdiv/resources.qrc -o qrc_resources.cpp
 
 compiler_moc_header_make_all: moc_mainwindow.cpp moc_mainview.cpp

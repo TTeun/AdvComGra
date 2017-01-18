@@ -19,7 +19,7 @@ public:
   ~MainView();
 
   MainWindow *mainWindow;
-  float rotX = 0, rotY = 0;
+  float rotX = 0, rotY = 0; // For rotation
 
   bool modelLoaded;
   bool wireframeMode;
@@ -28,18 +28,11 @@ public:
   float FoV;
   float dispRatio;
 
-  bool firstPass = true;    // When the model is just loaded, we build the control mesh (only once)
-
   void updateMatrices();
   void updateUniforms();
   void updateMeshBuffers(Mesh *currentMesh);
 
   QVector<Mesh> Meshes;     // Moved here from the MainWindow class for slightly easier jumpin between meshes
-
-  // Tessellation level
-  float tessLevelInner = 4.0;
-  float tessLevelOuter = 4.0;
-  bool showGridLines = false;
 
   bool showModel = true; // To hide model, can be useful when setting sharpness on the control mesh
 
@@ -74,16 +67,12 @@ private:
   GLint ctrlUniModelViewMatrix, ctrlUniProjectionMatrix, ctrlUniNormalMatrix;
   GLint uniShowGridLines;
 
-  // ---
-
   QOpenGLShaderProgram* mainShaderProg, *controlMeshShader;
 
   GLuint meshVAO, meshCoordsBO, meshNormalsBO, meshIndexBO;
   GLuint ctrlVAO, ctrlCoordsBO, ctrlIndexBO, ctrlColourBO;
   GLuint slctVAO, slctCoordsBO, slctIndexBO, slctColourBO;
   unsigned int meshIBOSize;
-
-  // ---
 
   QVector<QVector3D> vertexCoords;
   QVector<QVector3D> vertexNormals;
@@ -98,7 +87,7 @@ private:
   QVector<QVector3D> slctColours = {QVector3D(1.0, 0.0, 0.0), QVector3D(1.0, 0.0, 0.0)};
   QVector<unsigned int> slctlIndices = {0, 1};
 
-  //Used for vertex selection.
+  //Used for vertex selection. 6 colours because we make a small 3d cross on the selected vertex
   QVector<QVector3D> slctColoursVert = {QVector3D(1.0, 0.0, 0.0), QVector3D(1.0, 0.0, 0.0),QVector3D(1.0, 0.0, 0.0),
                                     QVector3D(1.0, 0.0, 0.0),QVector3D(1.0, 0.0, 0.0), QVector3D(1.0, 0.0, 0.0)};
   QVector<unsigned int>slctlIndicesVert = {0,1,2,3,4,5};
@@ -107,7 +96,7 @@ private:
   void createBuffers();  
 
   QVector2D lastPos;     // Keeping track of position for mouse rotation
-  bool rotating = false;
+  bool rotating = false; // Keeps track of if we are currently rotating
 
 private slots:
   void onMessageLogged( QOpenGLDebugMessage Message );

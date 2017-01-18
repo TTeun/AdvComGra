@@ -5,12 +5,11 @@
 #include <QVector3D>
 
 void subdivideCatmullClark(Mesh* inputMesh, Mesh *subdivMesh);
-void toLimitMesh(Mesh* inputMesh, Mesh *limitMesh); // Project mesh to its limit
 
 QVector3D vertexPoint(HalfEdge* firstEdge, Mesh *newMesh);
 QVector3D edgePoint(HalfEdge* firstEdge, Mesh* newMesh);
 QVector3D facePoint(HalfEdge* firstEdge);
-float chaiSharpness(HalfEdge *currentEdge);
+float chaiSharpness(HalfEdge *currentEdge);   // Chaikin sharpness smoothing
 
 HalfEdge* vertOnBoundary(Vertex* currentVertex);
 

@@ -24,7 +24,6 @@ public:
   Ui::MainWindow *ui;
   void setSharpness(double value);
 private:
-  unsigned int currentMesh = 0;
 
 private slots:
   void on_ImportOBJ_clicked();                 // Load object
@@ -32,7 +31,7 @@ private slots:
   void on_wireFrameCB_toggled(bool checked);   // Wireframe mode on/off
   void on_controlMeshCB_toggled(bool checked); // Show control mesh on/off
   void on_showModelCB_toggled(bool checked);   // Hide model on/off
-  void on_sharpnessSlider_editingFinished();
+  void on_sharpnessSlider_editingFinished();   // Sharpness updated
 
 private:
 };
