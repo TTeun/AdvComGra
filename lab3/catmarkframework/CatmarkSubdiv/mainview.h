@@ -69,13 +69,11 @@ private:
   GLint ctrlUniModelViewMatrix, ctrlUniProjectionMatrix, ctrlUniNormalMatrix,uniReflDensity;
   GLint uniShowGridLines;
 
-<<<<<<< HEAD
+
   // ---
 
   QOpenGLShaderProgram* mainShaderProg, *controlMeshShader, *reflShaderProg;
-=======
-  QOpenGLShaderProgram* mainShaderProg, *controlMeshShader;
->>>>>>> 425e72cd0736a0fad6cf7188bdccef8cde57260c
+
 
   GLuint meshVAO, meshCoordsBO, meshNormalsBO, meshIndexBO;
   GLuint ctrlVAO, ctrlCoordsBO, ctrlIndexBO, ctrlColourBO;

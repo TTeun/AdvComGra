@@ -47,17 +47,17 @@ void subdivideCatmullClark(Mesh* inputMesh, Mesh* subdivMesh) {
   for (k=0; k<numVerts; k++) {
     n = inputMesh->Vertices[k].val;
     // Coords (x,y,z), Out, Valence, Index
-<<<<<<< HEAD
+
     float sharp=0;
     //Check if a vertex has a sharpness assigned to it
     if(inputMesh->Vertices[k].out->twin->target->sharpness>0){
         sharp = std::max(inputMesh->Vertices[k].out->twin->target->sharpness-1,0);
     }
-=======
+
     sharp = 0.0;
     if(inputMesh->Vertices[k].sharpness)
         sharp = max(inputMesh->Vertices[k].sharpness-1,0); // Create new vertex that is less sharp
->>>>>>> 425e72cd0736a0fad6cf7188bdccef8cde57260c
+
 
     subdivMesh->Vertices.append( Vertex(vertexPoint(inputMesh->Vertices[k].out, subdivMesh),
                                         nullptr,
@@ -271,16 +271,15 @@ QVector3D vertexPoint(HalfEdge* firstEdge, Mesh* subdivMesh) {
   size_t incidentCreases = 0;
   currentEdge = firstEdge;
 
-<<<<<<< HEAD
+
   if(currentVertex->sharpness>0){
       //Sharp vertex case
       if (currentVertex->sharpness >= 3) // Vertex is a corner
           return currentVertex->coords;
   }else{
     //Normal vertex case
-=======
 
->>>>>>> 425e72cd0736a0fad6cf7188bdccef8cde57260c
+
   for (size_t i = 0; i < n; ++i){
       if (currentEdge->sharpness > 0.0){
           sharpness += currentEdge->sharpness;
@@ -308,6 +307,7 @@ QVector3D vertexPoint(HalfEdge* firstEdge, Mesh* subdivMesh) {
 
   // return smooth vertex position as incidentCreases < 2
   return ccVertexPoint(currentEdge, subdivMesh);
+}
 }
 
 QVector3D ccEdgePoint(HalfEdge *currentEdge, Mesh *subdivMesh){

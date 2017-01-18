@@ -85,16 +85,16 @@ void MainWindow::on_sharpnessSlider_editingFinished()
   int vertIndex = ui->MainDisplay->selected_index_vert;
   int edgeIndex = ui->MainDisplay->selected_index;
 
-<<<<<<< HEAD
+
   if(ui->MainDisplay->selected_index_vert>-1){
       //Setting the sharpness for a selected vertex
-=======
+
   if (vertIndex > -1){ // A vertex was selected when editing sharpness
->>>>>>> 425e72cd0736a0fad6cf7188bdccef8cde57260c
+
       Vertex *selectedVertex;
       selectedVertex = &ui->MainDisplay->Meshes[0].Vertices[vertIndex]; // Set sharpness of vertex
       selectedVertex->sharpness = ui->sharpnessSlider->value();
-<<<<<<< HEAD
+
       qDebug()<<"Sharpness:";
       qDebug()<< selectedVertex->sharpness;
   }else{
@@ -104,7 +104,7 @@ void MainWindow::on_sharpnessSlider_editingFinished()
   currentEdge->sharpness = ui->sharpnessSlider->value();
   currentEdge->twin->sharpness = currentEdge->sharpness;
     }
-=======
+
   } else if (edgeIndex > -1){ // An edge was selected
       HalfEdge *currentEdge;
       currentEdge = &ui->MainDisplay->Meshes[0].HalfEdges[edgeIndex];
@@ -112,7 +112,6 @@ void MainWindow::on_sharpnessSlider_editingFinished()
       currentEdge->twin->sharpness = currentEdge->sharpness;
   }
 
->>>>>>> 425e72cd0736a0fad6cf7188bdccef8cde57260c
   ui->MainDisplay->buildCtrlMesh();
 
   // We now have to redo the subdivision

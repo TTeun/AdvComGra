@@ -1,26 +1,19 @@
 #version 410
-// Tessellation control shader. Only sets the tessellation levels
-layout (vertices = 16) out;
+// Vertex shader
 
-layout (location = 0) in vec3 vertcoords_camera_vs[];
+layout (location = 0) in vec3 vertcoords_world_vs;
+layout (location = 2) in vec3 in_colour;
 
-layout (location = 0) out vec3 vertcoords_camera_te[];
+uniform mat4 modelviewmatrix;
+uniform mat4 projectionmatrix;
+uniform mat3 normalmatrix;
 
-uniform float TessLevelInner;
-uniform float TessLevelOuter;
+layout (location = 0) out vec3 vertcoords_camera_vs;
+layout (location = 2) out vec3 out_colour;
 
-void main()
-{
-  vertcoords_camera_te[gl_InvocationID] = vertcoords_camera_vs[gl_InvocationID];
+void main() {
+  gl_Position = projectionmatrix * modelviewmatrix * vec4(vertcoords_world_vs, 1.0);
 
-  if (gl_InvocationID == 0)
-  {
-      gl_TessLevelInner[0] = TessLevelInner;
-      gl_TessLevelInner[1] = TessLevelInner;
-
-      gl_TessLevelOuter[0] = TessLevelOuter;
-      gl_TessLevelOuter[1] = TessLevelOuter;
-      gl_TessLevelOuter[2] = TessLevelOuter;
-      gl_TessLevelOuter[3] = TessLevelOuter;
-    }
+  vertcoords_camera_vs = vec3(modelviewmatrix * vec4(vertcoords_world_vs, 1.0));
+  out_colour = in_colour;
 }

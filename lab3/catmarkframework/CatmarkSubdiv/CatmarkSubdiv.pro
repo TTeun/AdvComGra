@@ -40,4 +40,5 @@ DISTFILES += \
     shaders/ctrl_vertshader.glsl \
     shaders/fragshader.glsl \
     shaders/reflshader.glsl \
-    shaders/vertshader.glsl
+    shaders/vertshader.glsl \
+    vertshader.glsl

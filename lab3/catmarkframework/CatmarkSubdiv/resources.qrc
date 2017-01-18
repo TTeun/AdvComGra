@@ -4,10 +4,9 @@
         <file>shaders/vertshader.glsl</file>
         <file>shaders/ctrl_fragshader.glsl</file>
         <file>shaders/ctrl_vertshader.glsl</file>
-<<<<<<< HEAD
         <file>shaders/tess_geomshader.glsl</file>
+		<file>shaders/tess_fragshader.glsl</file>
         <file>shaders/reflshader.glsl</file>
-=======
->>>>>>> 425e72cd0736a0fad6cf7188bdccef8cde57260c
+
     </qresource>
 </RCC>
