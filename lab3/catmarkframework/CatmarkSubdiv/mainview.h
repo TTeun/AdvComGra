@@ -46,6 +46,7 @@ public:
   // This if setting the sharpness
   void *setSharpnessSlider(double sharpness);
   int selected_index = -1;
+  int selected_index_vert = -1;
   void buildCtrlMesh();  // Build the control mesh. Happens only once on firstPass, so can private
 
 
@@ -96,6 +97,11 @@ private:
   QVector<QVector3D> slctCoords;
   QVector<QVector3D> slctColours = {QVector3D(1.0, 0.0, 0.0), QVector3D(1.0, 0.0, 0.0)};
   QVector<unsigned int> slctlIndices = {0, 1};
+
+  //Used for vertex selection.
+  QVector<QVector3D> slctColoursVert = {QVector3D(1.0, 0.0, 0.0), QVector3D(1.0, 0.0, 0.0),QVector3D(1.0, 0.0, 0.0),
+                                    QVector3D(1.0, 0.0, 0.0),QVector3D(1.0, 0.0, 0.0), QVector3D(1.0, 0.0, 0.0)};
+  QVector<unsigned int>slctlIndicesVert = {0,1,2,3,4,5};
 
   void createShaderPrograms();
   void createBuffers();  

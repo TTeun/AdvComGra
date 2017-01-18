@@ -423,6 +423,8 @@ void MainView::mousePressEvent(QMouseEvent* event) {
       QVector4D ray_f = MV * ray_eye;
       QVector4D lastCol = MV.column(3);
 
+      float distVert, minDistVert = 1000.0;
+      int minIndexVert = 0;
 
       float dist, minDist = 1000.0;
       int minIndex = 0;
@@ -437,6 +439,35 @@ void MainView::mousePressEvent(QMouseEvent* event) {
 
       float s;
       HalfEdge *currentEdge;
+      Vertex *currentVert;
+
+      for( int i=0;i<Meshes[0].Vertices.size();i++){
+          currentVert = &Meshes[0].Vertices[i];
+
+          d1 =  currentVert->coords;
+
+          n = QVector3D::crossProduct(d2, d1);
+          n = n.normalized();
+
+          n2 = QVector3D::crossProduct(n, d2);
+          p1 = currentVert->coords;
+
+          s = QVector3D::dotProduct((p2 - p1), n2) / QVector3D::dotProduct(d1, n2);
+          if ((s < 0) || (s > 1)) // Here, we click beyond the end of the line, so we do not select it
+              distVert = 1000.0;
+          else {
+              distVert = QVector3D::dotProduct(n, (p2 - p1));
+              distVert = distVert < 0 ? (-distVert) : distVert;
+          }
+
+          if (distVert < minDistVert){
+              minDistVert = distVert;
+              minIndexVert = i;
+          }
+
+      }
+
+
       for (int i = 0; i < Meshes[0].HalfEdges.size(); ++i)
       {
           currentEdge = &Meshes[0].HalfEdges[i];
@@ -464,8 +495,7 @@ void MainView::mousePressEvent(QMouseEvent* event) {
 
       selected_index = minIndex;
 
-      if (selected_index > -1)
-        mainWindow->setSharpness(Meshes[0].HalfEdges[selected_index].sharpness); // Upload this sharpness to the GUI
+      // Upload this sharpness to the GUI
 
       updateMatrices();
 
@@ -473,17 +503,48 @@ void MainView::mousePressEvent(QMouseEvent* event) {
       slctCoords.squeeze();
 
       // Update coordinates of the selected edge points
-      slctCoords.append(Meshes[0].HalfEdges[selected_index].target->coords);
-      slctCoords.append(Meshes[0].HalfEdges[selected_index].twin->target->coords);
+      if(minDistVert>0.05){
+          //Edge selection case
+          selected_index_vert =-1;
+          slctCoords.append(Meshes[0].HalfEdges[selected_index].target->coords);
+          slctCoords.append(Meshes[0].HalfEdges[selected_index].twin->target->coords);
+          if (selected_index > -1)
+            mainWindow->setSharpness(Meshes[0].HalfEdges[selected_index].sharpness);
+          glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, slctIndexBO);
+          glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(unsigned int)*slctlIndices.size(), slctlIndices.data(), GL_DYNAMIC_DRAW);
+          glBindBuffer(GL_ARRAY_BUFFER, slctColourBO);
+          glBufferData(GL_ARRAY_BUFFER, sizeof(QVector3D)*slctColours.size(), slctColours.data(), GL_DYNAMIC_DRAW);
+      }else{
+          //Vertex selection case
+          selected_index_vert = minIndexVert;
+          QVector3D offset= QVector3D(0.015,0.015,0.015);
+          QVector3D offset2= QVector3D(0.015,-0.015,0.015);
+          QVector3D offset3= QVector3D(0.015,0.015,-0.015);
+          //slctCoords.append(Meshes[0].Vertices[minIndexVert].coords);
+          slctCoords.append(Meshes[0].Vertices[minIndexVert].coords+ offset);
+          slctCoords.append(Meshes[0].Vertices[minIndexVert].coords- offset);
+          slctCoords.append(Meshes[0].Vertices[minIndexVert].coords+ offset2);
+          slctCoords.append(Meshes[0].Vertices[minIndexVert].coords- offset2);
+          slctCoords.append(Meshes[0].Vertices[minIndexVert].coords+ offset3);
+          slctCoords.append(Meshes[0].Vertices[minIndexVert].coords- offset3);
+          mainWindow->setSharpness(Meshes[0].Vertices[minIndexVert].sharpness);
+          glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, slctIndexBO);
+          glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(unsigned int)*slctlIndicesVert.size(), slctlIndicesVert.data(), GL_DYNAMIC_DRAW);
+          glBindBuffer(GL_ARRAY_BUFFER, slctColourBO);
+          glBufferData(GL_ARRAY_BUFFER, sizeof(QVector3D)*slctColoursVert.size(), slctColoursVert.data(), GL_DYNAMIC_DRAW);
+      }
 
-      glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, slctIndexBO);
-      glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(unsigned int)*slctlIndices.size(), slctlIndices.data(), GL_DYNAMIC_DRAW);
+      //glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, slctIndexBO);
+      //glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(unsigned int)*slctlIndices.size(), slctlIndices.data(), GL_DYNAMIC_DRAW);
 
+
+
+      qDebug()<< slctlIndices;
+      qDebug()<<slctlIndices.size();
       glBindBuffer(GL_ARRAY_BUFFER, slctCoordsBO);
       glBufferData(GL_ARRAY_BUFFER, sizeof(QVector3D)*slctCoords.size(), slctCoords.data(), GL_DYNAMIC_DRAW);
 
-      glBindBuffer(GL_ARRAY_BUFFER, slctColourBO);
-      glBufferData(GL_ARRAY_BUFFER, sizeof(QVector3D)*slctColours.size(), slctColours.data(), GL_DYNAMIC_DRAW);
+
 
   }
 }

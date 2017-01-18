@@ -74,11 +74,18 @@ void MainWindow::on_sharpnessSlider_editingFinished()
   if (ui->MainDisplay->selected_index >=  ui->MainDisplay->Meshes[0].HalfEdges.size() || (ui->MainDisplay->selected_index <= 0))
     return;
 
+  if(ui->MainDisplay->selected_index_vert>-1){
+      Vertex *selectedVertex;
+      selectedVertex = &ui->MainDisplay->Meshes[0].Vertices[ui->MainDisplay->selected_index_vert];
+      selectedVertex->sharpness = ui->sharpnessSlider->value();
+      qDebug()<<"Sharpness:";
+      qDebug()<< selectedVertex->sharpness;
+  }else{
   HalfEdge *currentEdge;
   currentEdge = &ui->MainDisplay->Meshes[0].HalfEdges[ui->MainDisplay->selected_index];
   currentEdge->sharpness = ui->sharpnessSlider->value();
   currentEdge->twin->sharpness = currentEdge->sharpness;
-
+    }
   ui->MainDisplay->buildCtrlMesh();
   ui->MainDisplay->Meshes.resize(1);
   ui->MainDisplay->Meshes.squeeze();

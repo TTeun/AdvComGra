@@ -46,10 +46,14 @@ void subdivideCatmullClark(Mesh* inputMesh, Mesh* subdivMesh) {
   for (k=0; k<numVerts; k++) {
     n = inputMesh->Vertices[k].val;
     // Coords (x,y,z), Out, Valence, Index
+    float sharp=0;
+    if(inputMesh->Vertices[k].out->twin->target->sharpness>0){
+        sharp = std::max(inputMesh->Vertices[k].out->twin->target->sharpness-1,0);
+    }
     subdivMesh->Vertices.append( Vertex(vertexPoint(inputMesh->Vertices[k].out, subdivMesh),
                                         nullptr,
                                         n,
-                                        vIndex) );
+                                        vIndex,sharp) );
     vIndex++;
   }
 
@@ -249,14 +253,28 @@ QVector3D vertexPoint(HalfEdge* firstEdge, Mesh* subdivMesh) {
   float sharpness = 0.0;
   size_t incidentCreases = 0;
   currentEdge = firstEdge;
+
+  if(currentVertex->sharpness>0){
+      //currentVertex->sharpness = currentVertex->sharpness-1.0;
+      if (currentVertex->sharpness >= 3) // Vertex is a corner
+          return currentVertex->coords;
+      if(currentVertex->sharpness==2){
+          vertexPt += 6.0 * currentVertex->coords;
+          vertexPt /= 8.0;
+          return vertexPt;
+      }
+  }else{
+
   for (size_t i = 0; i < n; ++i){
       if (currentEdge->sharpness > 0.0){
           sharpness += currentEdge->sharpness;
           ++incidentCreases;
           vertexPt += ccVertexPoint(currentEdge, subdivMesh);
+
       }
       currentEdge = currentEdge->prev->twin;
   }
+
 
   // At this point, vertexPt is the sum of the vertices connected to currentVertex by sharp edges.
   if (incidentCreases >= 3) // Vertex is a corner
@@ -271,6 +289,7 @@ QVector3D vertexPoint(HalfEdge* firstEdge, Mesh* subdivMesh) {
           vertexPt += (1-sharpness) * ccVertexPoint(currentEdge, subdivMesh);
       }
       return vertexPt;
+  }
   }
   return ccVertexPoint(currentEdge, subdivMesh);
 }
